@@ -22,7 +22,7 @@
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="OtoDeck"/>
-        <CONFIGURATION isDebug="0" name="Release" targetName="OtoDeck"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="OtoDeck" linuxArchitecture=""/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../../../../JUCE/modules"/>
