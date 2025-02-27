@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 
+#include "juce_audio_formats/juce_audio_formats.h"
 #include "juce_audio_utils/juce_audio_utils.h"
 #include "juce_core/juce_core.h"
 #include "juce_gui_basics/juce_gui_basics.h"
@@ -27,8 +28,14 @@ class MainComponent : public juce::AudioAppComponent, public juce::Button::Liste
         void releaseResources() override;
 
        private:
-        //==============================================================================
-        // Your private member variables go here...
+        juce::AudioFormatManager formatManager;
+        juce::AudioThumbnailCache thumbnailCache{5};
+
+        juce::FileChooser chooser{"Select a file to play...",
+                                  juce::File::getSpecialLocation(juce::File::userHomeDirectory),
+                                  "*.wav;*.mp3;*.aiff;*.flac;*.ogg;*.m4a;*.mp4;*.wma;*.ac3;*.aifc;*.caf;*.alac;*.ape;*."
+                                  "mpc;*.ogg;*.opus;*.tta;*.wv;*.dsf;*.dff"};
+
         juce::TextButton playButton{"Hello honey"};
         juce::TextButton stopButton{"Bye"};
         juce::Slider volumeSlider{juce::Slider::SliderStyle::LinearHorizontal,
