@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 
+#include "AudioPlayer.h"
 #include "juce_audio_formats/juce_audio_formats.h"
 #include "juce_audio_utils/juce_audio_utils.h"
 #include "juce_core/juce_core.h"
@@ -31,7 +32,10 @@ class MainComponent : public juce::AudioAppComponent, public juce::Button::Liste
         juce::AudioFormatManager formatManager;
         juce::AudioThumbnailCache thumbnailCache{5};
 
-        juce::FileChooser chooser{"Select a file to play...",
+        AudioPlayer player1{formatManager};        // set player1 object of DJAudio class
+        AudioPlayer player2{formatManager};        // set player2 object of DJAudio class
+
+        juce::FileChooser chooser{"Select a file to proccess...",
                                   juce::File::getSpecialLocation(juce::File::userHomeDirectory),
                                   "*.wav;*.mp3;*.aiff;*.flac;*.ogg;*.m4a;*.mp4;*.wma;*.ac3;*.aifc;*.caf;*.alac;*.ape;*."
                                   "mpc;*.ogg;*.opus;*.tta;*.wv;*.dsf;*.dff"};
