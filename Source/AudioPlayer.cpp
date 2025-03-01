@@ -28,26 +28,29 @@ void AudioPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate) 
 
 void AudioPlayer::releaseResources() {
         reverbSource.releaseResources();
-        transportSource.releaseResources();
+        // transportSource.releaseResources();
         resampleSource.releaseResources();
-        readerSource->releaseResources();
+        // readerSource->releaseResources();
 }
 
-void AudioPlayer::getNextAudioBlock(const AudioSourceChannelInfo& bufferToFill) {}
+void AudioPlayer::getNextAudioBlock(const AudioSourceChannelInfo& bufferToFill) {
+        resampleSource.getNextAudioBlock(bufferToFill);
+}
 
 void AudioPlayer::loadUrl(URL audioUrl) {
         // unpack audio URL and converted to input stream, and creates a reader
         auto* reader = formatManager.createReaderFor(audioUrl.createInputStream(false));
 
-        if (reader != nullptr) {
-                // create audio format reader source, when file is read
-                std::unique_ptr<juce::AudioFormatReaderSource> newSource(
-                    new juce::AudioFormatReaderSource(reader, true));
-                // control playback of audio
-                transportSource.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
-                // transfer ownership to class variable
-                readerSource.reset(newSource.release());
+        if (reader == nullptr) {
+                return;
         }
+
+        // create audio format reader source, when file is read
+        std::unique_ptr<juce::AudioFormatReaderSource> newSource(new juce::AudioFormatReaderSource(reader, true));
+        // control playback of audio
+        transportSource.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
+        // transfer ownership to class variable
+        readerSource.reset(newSource.release());
 }
 
 void AudioPlayer::setGain(double gain) {

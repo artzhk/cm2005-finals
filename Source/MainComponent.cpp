@@ -8,27 +8,45 @@
 MainComponent::MainComponent() {
         setSize(600, 400);
 
-        addAndMakeVisible(playButton);
-        addAndMakeVisible(stopButton);
-        addAndMakeVisible(volumeSlider);
-        playButton.addListener(this);
-        stopButton.addListener(this);
-        volumeSlider.addListener(this);
-        setAudioChannels(0, 3);
+        if (juce::RuntimePermissions::isRequired(juce::RuntimePermissions::recordAudio) &&
+            !juce::RuntimePermissions::isGranted(juce::RuntimePermissions::recordAudio)) {
+                juce::RuntimePermissions::request(juce::RuntimePermissions::recordAudio,
+                                                  [&](bool granted) { setAudioChannels(granted ? 2 : 0, 2); });
+        } else {
+                // Specify the number of input and output channels that we want to open
+                setAudioChannels(2, 2);
+        }
+
+        // addAndMakeVisible(playButton);
+        // addAndMakeVisible(stopButton);
+        // addAndMakeVisible(volumeSlider);
+        addAndMakeVisible(assemblePane1);
+
+        formatManager.registerBasicFormats();
+        // playButton.addListener(this);
+        // stopButton.addListener(this);
+        // volumeSlider.addListener(this);
 }
 
-MainComponent::~MainComponent() {}
+MainComponent::~MainComponent() { shutdownAudio(); }
 
 //==============================================================================
 void MainComponent::paint(juce::Graphics &g) {
         //
         // (Our component is opaque, so we must completely fill the background
         // with a solid colour)
-        g.fillAll(juce::Colours::white);
+        // g.fillAll(juce::olours::white);
 
-        g.setFont(juce::FontOptions(16.0f));
-        g.setColour(juce::Colours::black);
-        g.drawText("Hello World!", getLocalBounds(), juce::Justification::bottomLeft, true);
+        // g.setFont(juce::FontOptions(16.0f));
+        // g.setColour(juce::Colours::black);
+        // g.drawText("Hello World!", getLocalBounds(), juce::Justification::bottomLeft, true);
+
+        g.fillAll(juce::Colour{62, 95, 138});
+
+        // You can add your drawing code here!
+        g.setColour(juce::Colours::navajowhite);
+        g.setFont(30.0f);
+        g.drawText("Hello World!", getLocalBounds(), juce::Justification::centred, true);
 }
 
 void MainComponent::resized() {
@@ -38,55 +56,31 @@ void MainComponent::resized() {
         int rowH = getHeight() / 5;
         int closeBthH = getHeight() / 7;
 
-        playButton.setBounds(0, rowH, getWidth(), rowH);
-        stopButton.setBounds(2 * (getWidth() / 3), 3 * rowH, getWidth() / 3, closeBthH);
-        volumeSlider.setBounds(0, rowH + rowH, getWidth(), rowH);
+        std::cout << "This is resized method" << std::endl;
+
+        // playButton.setBounds(0, rowH, getWidth(), rowH);
+        // stopButton.setBounds(2 * (getWidth() / 3), 3 * rowH, getWidth() / 3, closeBthH);
+        // volumeSlider.setBounds(0, rowH + rowH, getWidth(), rowH);
+
+        assemblePane1.setBounds(0, 0, getWidth() / 2, getHeight() / 2);        // getWidth() / 2 to set two decks
 }
 
-void MainComponent::releaseResources() { return; }
+void MainComponent::releaseResources() {
+        mixerSource.removeAllInputs();
+        mixerSource.releaseResources();
+        player1.releaseResources();
+}
 
 void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate) {
         std::cout << "This is prepare to play method" << std::endl;
         phase = 0;
         dphase = 0.001;
 
-        return;
+        mixerSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
+        mixerSource.addInputSource(&player1, false);
 }
 
 void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo &bufferToFill) {
-        auto *leftChan = bufferToFill.buffer->getWritePointer(0, bufferToFill.startSample);
-        auto *rightChan = bufferToFill.buffer->getWritePointer(0, bufferToFill.startSample);
-        for (int i = 0; i < bufferToFill.numSamples; ++i) {
-                double sample = fmod(phase, 0.2);
-                leftChan[i] = sample;
-                rightChan[i] = sample;
-                phase += dphase;
-        }
-
+        mixerSource.getNextAudioBlock(bufferToFill);
         return;
-}
-
-/** Called when the button is clicked. */
-void MainComponent::buttonClicked(juce::Button *button) {
-        if (button == &playButton) {
-                std::cout << "lol the button is working" << std::endl;
-                return;
-        }
-
-        if (button == &stopButton) {
-                std::cout << "lol the button stop is working" << std::endl;
-                return;
-        }
-
-        return;
-}
-
-void MainComponent::sliderValueChanged(juce::Slider *slider) {
-        std::cout << "aint no way the slider is working" << volumeSlider.getValue() << std::endl;
-
-        if (slider == &volumeSlider) {
-                dphase = volumeSlider.getValue() * 0.001;
-        }
-
-        slider->updateText();
 }
