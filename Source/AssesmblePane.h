@@ -58,7 +58,8 @@ class AssemblePane : public juce::Component,
         juce::Slider positionSlider;
         juce::Label positionLabel;
 
-        juce::FileChooser fChooser{"Select a file..."};
+        juce::FileChooser fChooser{"Select a file...", File::getSpecialLocation(File::userHomeDirectory)};
+        // std::unique_ptr<juce::FileChooser> fChooser;
 
         AudioPlayer* player;        // AssemblePane is unaware of audio player;
                                     // when receive events from buttons, how to send events on to DJAudio player;
@@ -69,6 +70,7 @@ class AssemblePane : public juce::Component,
                 double defaultValue;
                 int numDecimalPlaces;
                 juce::Slider::SliderStyle style;
+                std::string* textValueSuffix = nullptr;
         };
 
         void setupButton(juce::Button* component);
