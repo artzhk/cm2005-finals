@@ -20,6 +20,9 @@ class AudioPlayer : public AudioSource {
         void setGain(double gain);
         void setSpeed(double ratio);
         void setPosition(double posInSecs);
+        void setPositionRelative(double pos);
+        double getPositionRelative();
+        double getLengthInSeconds();       
 
         void start();
         void stop();
@@ -34,8 +37,8 @@ class AudioPlayer : public AudioSource {
         std::unique_ptr<AudioFormatReaderSource> readerSource;
         // audio speed control
         ResamplingAudioSource resampleSource{&transportSource, false, 2};
+        ReverbAudioSource reverbSource{&resampleSource, false};
 
         // reverb stuf
         Reverb::Parameters reverbParameters;
-        ReverbAudioSource reverbSource{&resampleSource, false};
 };

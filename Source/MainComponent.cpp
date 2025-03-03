@@ -8,14 +8,16 @@
 MainComponent::MainComponent() {
         setSize(600, 400);
 
-        if (juce::RuntimePermissions::isRequired(juce::RuntimePermissions::recordAudio) &&
-            !juce::RuntimePermissions::isGranted(juce::RuntimePermissions::recordAudio)) {
-                juce::RuntimePermissions::request(juce::RuntimePermissions::recordAudio,
-                                                  [&](bool granted) { setAudioChannels(granted ? 2 : 0, 2); });
-        } else {
-                // Specify the number of input and output channels that we want to open
-                setAudioChannels(2, 2);
-        }
+        // if (RuntimePermissions::isRequired(RuntimePermissions::recordAudio) &&
+        //     !RuntimePermissions::isGranted(RuntimePermissions::recordAudio)) {
+        //         RuntimePermissions::request(RuntimePermissions::recordAudio, [&](bool granted) {
+        //                 if (granted) setAudioChannels(2, 2);
+        //         });
+        // } else {
+        //         setAudioChannels(0, 2);
+        // }
+
+        setAudioChannels(0, 2);
 
         // addAndMakeVisible(playButton);
         // addAndMakeVisible(stopButton);
@@ -31,7 +33,7 @@ MainComponent::MainComponent() {
 MainComponent::~MainComponent() { shutdownAudio(); }
 
 //==============================================================================
-void MainComponent::paint(juce::Graphics &g) {
+void MainComponent::paint(juce::Graphics& g) {
         //
         // (Our component is opaque, so we must completely fill the background
         // with a solid colour)
@@ -58,10 +60,6 @@ void MainComponent::resized() {
 
         std::cout << "This is resized method" << std::endl;
 
-        // playButton.setBounds(0, rowH, getWidth(), rowH);
-        // stopButton.setBounds(2 * (getWidth() / 3), 3 * rowH, getWidth() / 3, closeBthH);
-        // volumeSlider.setBounds(0, rowH + rowH, getWidth(), rowH);
-
         assemblePane1.setBounds(0, 0, getWidth() / 2, getHeight() / 2);        // getWidth() / 2 to set two decks
 }
 
@@ -73,14 +71,31 @@ void MainComponent::releaseResources() {
 
 void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate) {
         std::cout << "This is prepare to play method" << std::endl;
-        phase = 0;
-        dphase = 0.001;
+        // phase = 0.2;
+        // dphase = 0.001;
+        player1.prepareToPlay(samplesPerBlockExpected, sampleRate);
 
         mixerSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
         mixerSource.addInputSource(&player1, false);
 }
 
-void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo &bufferToFill) {
+void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) {
+        // bufferToFill.clearActiveBufferRegion();
         mixerSource.getNextAudioBlock(bufferToFill);
-        return;
+
+
+        // auto* leftChannel = bufferToFill.buffer->getWritePointer(0, bufferToFill.startSample);
+        // auto* rightChannel = bufferToFill.buffer->getWritePointer(0, bufferToFill.startSample);
+
+        // for (auto i = 0; i < bufferToFill.numSamples;
+        //      ++i)        // increments and assigns; while i++ copies, increements copy and then assigns
+        // {
+        //         double sample = rand.nextDouble() * 0.5;
+        //         // double sample = fmod(phase, 0.3);
+
+        //         leftChannel[i] = sample;
+        //         rightChannel[i] = sample;
+
+        //         phase += dphase;
+        // }
 }

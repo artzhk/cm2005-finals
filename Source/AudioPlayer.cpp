@@ -62,11 +62,31 @@ void AudioPlayer::setGain(double gain) {
 }
 
 void AudioPlayer::setSpeed(double ratio) {
-        if (ratio > 0 && ratio < 10.0) {
+        if (ratio > 0 && ratio < 100.0) {
                 resampleSource.setResamplingRatio(ratio);
         }
 
         return;
+}
+
+void AudioPlayer::setPositionRelative(double pos) {
+        if (pos > 0 && pos < 1.0) {
+                double posInSecs = transportSource.getLengthInSeconds() * pos;
+                setPosition(posInSecs);
+        }
+        return;
+}
+
+double AudioPlayer::getPositionRelative() {
+        if (transportSource.getLengthInSeconds() > 0) {
+                return (transportSource.getCurrentPosition() / transportSource.getLengthInSeconds()) * 100;
+        } else {
+                return 0;
+        };
+}
+
+double AudioPlayer::getLengthInSeconds() {
+        return transportSource.getLengthInSeconds();
 }
 
 void AudioPlayer::setPosition(double posInSecs) { transportSource.setPosition(posInSecs); }

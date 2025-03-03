@@ -5,6 +5,7 @@
 #include <tuple>
 
 #include "AudioPlayer.h"        // to know about this class
+#include "WaveDisplay.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 
 //==============================================================================
@@ -18,6 +19,7 @@ class AssemblePane : public juce::Component,
        public:
         AssemblePane(AudioPlayer* player, juce::AudioFormatManager& formatManagerToUse,
                      juce::AudioThumbnailCache& cacheToUse);
+
         // AssemblePane gets DJ audio player via the constructor, and use assignment list
         ~AssemblePane() override;
 
@@ -58,7 +60,9 @@ class AssemblePane : public juce::Component,
         juce::Slider positionSlider;
         juce::Label positionLabel;
 
-        juce::FileChooser fChooser{"Select a file...", File::getSpecialLocation(File::userHomeDirectory)};
+        WaveDisplay waveDisplay;
+
+        juce::FileChooser fChooser{"Select a file...", File::getSpecialLocation(File::userHomeDirectory), "*.wav;*.mp3;*.aiff"};
         // std::unique_ptr<juce::FileChooser> fChooser;
 
         AudioPlayer* player;        // AssemblePane is unaware of audio player;
@@ -75,6 +79,7 @@ class AssemblePane : public juce::Component,
 
         void setupButton(juce::Button* component);
         void setupSlider(juce::Slider* component, LookAndFeel* lookAndFeel, SliderParams params);
+        void setupLabel(juce::Component* target, juce::Label* label, std::string text);
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AssemblePane)
 };

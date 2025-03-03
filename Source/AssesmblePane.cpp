@@ -2,15 +2,19 @@
 #include "AssesmblePane.h"
 
 #include <memory>
+#include <string>
 
+#include "WaveDisplay.h"
 #include "juce_core/system/juce_PlatformDefs.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 
-AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& formatManagerToUse,
-                           juce::AudioThumbnailCache& cacheToUse)
-    : player(_player) {
+AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& _formatManagerToUse,
+                           juce::AudioThumbnailCache& _cacheToUse)
+    : player(_player), waveDisplay(_formatManagerToUse, _cacheToUse) {
         // In your constructor, you should add any child components, and initialise any special settings that your
         // component needs.
+
+        // TODO: add high mid and low sliders controls
 
         setupButton(&playButton);
         setupButton(&stopButton);
@@ -31,10 +35,7 @@ AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& forma
         };
 
         setupSlider(&volSlider, &otherLookAndFeel1, volSliderParams);
-
-        addAndMakeVisible(volLabel);
-        volLabel.setText("Volume", juce::dontSendNotification);
-        volLabel.attachToComponent(&volSlider, true);
+        setupLabel(&volSlider, &volLabel, "Volume");
 
         SliderParams speedSliderParams = {
             .range = {0.1, 2.0},
@@ -44,19 +45,7 @@ AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& forma
         };
 
         setupSlider(&speedSlider, &otherLookAndFeel2, speedSliderParams);
-
-        // speedSlider.setLookAndFeel(&otherLookAndFeel2);
-        // speedSlider.setSliderStyle(juce::Slider::Rotary);
-        // speedSlider.addListener(this);        // thing that wants to receive the events needs to tell the GUI object
-        //                                       // that is wants to register for events
-        // speedSlider.setRange(0.1, 2.0);
-        // speedSlider.setValue(1.0);
-        // speedSlider.setNumDecimalPlacesToDisplay(2);
-        // speedSlider.setTextBoxStyle(juce::Slider::TextBoxLeft, false, 60, speedSlider.getTextBoxHeight());
-
-        addAndMakeVisible(speedLabel);
-        speedLabel.setText("Speed", juce::dontSendNotification);
-        speedLabel.attachToComponent(&speedSlider, true);
+        setupLabel(&speedSlider, &speedLabel, "Speed");
 
         SliderParams dampingSliderParams = {
             .range = {1, 1000.0},
@@ -67,24 +56,10 @@ AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& forma
         };
 
         setupSlider(&dampingSlider, &otherLookAndFeel3, dampingSliderParams);
-
-        // addAndMakeVisible(dampingSlider);
-        // dampingSlider.setRange(1, 1000.0);
-        // dampingSlider.setTextValueSuffix(" factor");
-        // dampingSlider.setValue(10.0);
-        // dampingSlider.addListener(this);
-        // dampingSlider.setSkewFactorFromMidPoint(500);
-        // dampingSlider.setTextBoxStyle(juce::Slider::TextBoxLeft, false, 120, dampingSlider.getTextBoxHeight());
-        // addAndMakeVisible(dampingLabel);
-        // dampingLabel.setText("Damping", juce::dontSendNotification);
-        // dampingLabel.attachToComponent(&dampingSlider, true);
-
-        addAndMakeVisible(dampingLabel);
-        dampingLabel.setText("Damping", juce::dontSendNotification);
-        dampingLabel.attachToComponent(&dampingSlider, true);
+        setupLabel(&dampingSlider, &dampingLabel, "Damping");
 
         SliderParams positionSliderParams = {
-            .range = {0.0, 1.0},
+            .range = {0.0, 100.0},
             .defaultValue = 10.0,
             .numDecimalPlaces = 2,
             .style = juce::Slider::LinearHorizontal,
@@ -92,10 +67,9 @@ AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& forma
         };
 
         setupSlider(&positionSlider, &otherLookAndFeel3, positionSliderParams);
+        setupLabel(&positionSlider, &positionLabel, "Position");
 
-        addAndMakeVisible(positionLabel);
-        positionLabel.setText("Position", juce::dontSendNotification);
-        positionLabel.attachToComponent(&positionSlider, true);
+        addAndMakeVisible(waveDisplay);
 
         startTimer(500);
 }
@@ -126,6 +100,12 @@ void AssemblePane::setupSlider(juce::Slider* component, LookAndFeel* lookAndFeel
         }
 };
 
+void AssemblePane::setupLabel(juce::Component* target, juce::Label* label, std::string text) {
+        addAndMakeVisible(label);
+        label->setText(text, juce::dontSendNotification);
+        label->attachToComponent(label, true);
+};
+
 void AssemblePane::paint(juce::Graphics& g) {
         /* This demo code just fills the component's background and
            draws some placeholder text to get you started.
@@ -146,6 +126,8 @@ void AssemblePane::paint(juce::Graphics& g) {
         // g.drawText ("DJ Audio", getLocalBounds(),juce::Justification::centred, true);   // draw some placeholder text
         g.drawText("DJ Audio", 10, 10, getWidth(), 10, juce::Justification::centred,
                    true);        // draw some placeholder text
+        double len = player->getLengthInSeconds();
+        g.drawText(std::to_string(len), 10, 40, getWidth(), 10, juce::Justification::centred, true);
 }
 
 void AssemblePane::resized() {
@@ -170,15 +152,14 @@ void AssemblePane::resized() {
         speedSlider.setBounds(sliderLeft + width / 2, 10 + (rowHeight * 2), width / 2 - sliderLeft, rowHeight * 4);
         positionSlider.setBounds(sliderLeft, 10 + (rowHeight * 5), width - sliderLeft, rowHeight * 2);
         dampingSlider.setBounds(sliderLeft, 10 + (rowHeight * 7), width - sliderLeft, rowHeight * 2);
+
+        waveDisplay.setBounds(5, 8 * (getHeight() / 10), width + 10, rowHeight * 2.2);
 }
 
 // intended to handle button click listener events
 void AssemblePane::buttonClicked(juce::Button* button) {
         if (button == &playButton) {
                 std::cout << "Play button clicked" << std::endl;
-
-                // player calls setPosition(0) function from DJaudio to start playing from the beginning
-                player->setPosition(0);
 
                 // player calls start function from DJaudio
                 player->start();
@@ -226,13 +207,13 @@ void AssemblePane::filesDropped(const juce::StringArray& files, int, int y) {
         DBG("Files dropped");
         if (files.size() == 1) {
                 player->loadUrl(juce::URL{juce::File{files[0]}});        // player calls loadURL function from DJaudio
-                // waveFormDisplay.loadURL(juce::URL{ fChooser.getResult() });
+                waveDisplay.loadURL(juce::URL{fChooser.getResult()});
         }
 }
 
-void AssemblePane::timerCallback() {}
+void AssemblePane::timerCallback() { waveDisplay.setPositionRelative(player->getPositionRelative()); }
 
 void AssemblePane::loadFile(juce::URL audioURL) {
-        DBG("DeckGUI::loadFile called");
+        DBG("AssemblePane::loadFile called");
         player->loadUrl(audioURL);
 }
