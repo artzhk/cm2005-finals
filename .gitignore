@@ -4,3 +4,4 @@ Builds/**
 JuceLibraryCode/**
 *.jucer
 .clang-format
+Session.vim
