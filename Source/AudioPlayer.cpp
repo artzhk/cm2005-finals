@@ -1,5 +1,10 @@
 #include "AudioPlayer.h"
 
+#include <memory>
+
+#include "juce_audio_formats/juce_audio_formats.h"
+#include "juce_core/juce_core.h"
+
 using namespace juce;
 
 AudioPlayer::AudioPlayer(AudioFormatManager& _formatManager) : formatManager(_formatManager) {
@@ -21,9 +26,9 @@ AudioPlayer::AudioPlayer(AudioFormatManager& _formatManager) : formatManager(_fo
 AudioPlayer::~AudioPlayer() {}
 
 void AudioPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate) {
-        transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
         resampleSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
         reverbSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
+        transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
 void AudioPlayer::releaseResources() {
@@ -38,13 +43,30 @@ void AudioPlayer::getNextAudioBlock(const AudioSourceChannelInfo& bufferToFill) 
 }
 
 void AudioPlayer::loadUrl(URL audioUrl) {
-        // unpack audio URL and converted to input stream, and creates a reader
-        auto* reader = formatManager.createReaderFor(audioUrl.createInputStream(false));
+        File audioFile = audioUrl.getLocalFile();
 
-        if (reader == nullptr) {
+        // Enable MP3 support
+#if JUCE_USE_MP3AUDIOFORMAT
+        DBG("MP3 support enabled");
+        formatManager.registerFormat(new MP3AudioFormat(), true);
+#endif
+
+        if (!audioFile.existsAsFile()) {
+                DBG("Error: File does not exist -> " + audioFile.getFullPathName());
                 return;
         }
 
+        formatManager.registerBasicFormats(); 
+        std::unique_ptr<InputStream> inputStream(audioFile.createInputStream());
+
+        AudioFormatReader* reader = formatManager.createReaderFor(audioFile);
+
+        if (reader == nullptr) {
+                DBG("Error: could not create reader for file");
+                return;
+        }
+
+        DBG("Audio file loaded: " << audioUrl.toString(true));
         // create audio format reader source, when file is read
         std::unique_ptr<juce::AudioFormatReaderSource> newSource(new juce::AudioFormatReaderSource(reader, true));
         // control playback of audio
@@ -54,7 +76,7 @@ void AudioPlayer::loadUrl(URL audioUrl) {
 }
 
 void AudioPlayer::setGain(double gain) {
-        if (gain > 0 && gain < 1.0) {
+        if (gain > 0 && gain < 10.0) {
                 transportSource.setGain(gain);
         }
 
@@ -85,9 +107,7 @@ double AudioPlayer::getPositionRelative() {
         };
 }
 
-double AudioPlayer::getLengthInSeconds() {
-        return transportSource.getLengthInSeconds();
-}
+double AudioPlayer::getLengthInSeconds() { return transportSource.getLengthInSeconds(); }
 
 void AudioPlayer::setPosition(double posInSecs) { transportSource.setPosition(posInSecs); }
 

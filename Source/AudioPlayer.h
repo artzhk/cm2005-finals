@@ -28,17 +28,17 @@ class AudioPlayer : public AudioSource {
         void stop();
 
        private:
-        // handle audio file formats
+        // Handle audio file formats
         AudioFormatManager& formatManager;
 
-        // audio playback control and audio volume
+        // Audio playback control and audio volume
         AudioTransportSource transportSource;
-        // to create on the fly, to read a file once the file is identified, smart pointer requiered by the JUCE
+        // To create on the fly, to read a file once the file is identified, smart pointer requiered by the JUCE
         std::unique_ptr<AudioFormatReaderSource> readerSource;
-        // audio speed control
+        // Audio speed control
         ResamplingAudioSource resampleSource{&transportSource, false, 2};
         ReverbAudioSource reverbSource{&resampleSource, false};
 
-        // reverb stuf
+        // Reverb stuf
         Reverb::Parameters reverbParameters;
 };

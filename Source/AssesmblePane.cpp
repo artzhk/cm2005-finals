@@ -1,7 +1,6 @@
 
 #include "AssesmblePane.h"
 
-#include <memory>
 #include <string>
 
 #include "WaveDisplay.h"
@@ -160,7 +159,8 @@ void AssemblePane::resized() {
 void AssemblePane::buttonClicked(juce::Button* button) {
         if (button == &playButton) {
                 std::cout << "Play button clicked" << std::endl;
-
+                int secs = player->getLengthInSeconds();
+                DBG("Length of track: " << secs);
                 // player calls start function from DJaudio
                 player->start();
         }
@@ -187,10 +187,12 @@ void AssemblePane::sliderValueChanged(juce::Slider* slider) {
                 player->setGain(slider->getValue());
                 std::cout << "After Vol Slider handle" << std::endl;
         }
+
         if (slider == &speedSlider) {
                 std::cout << "Speed Slider changed" << slider->getValue() << std::endl;
                 player->setSpeed(slider->getValue());
         }
+
         if (slider == &positionSlider) {
                 std::cout << "Position Slider changed" << slider->getValue() << std::endl;
                 player->setPosition(slider->getValue());
@@ -211,9 +213,13 @@ void AssemblePane::filesDropped(const juce::StringArray& files, int, int y) {
         }
 }
 
-void AssemblePane::timerCallback() { waveDisplay.setPositionRelative(player->getPositionRelative()); }
+void AssemblePane::timerCallback() {
+        positionSlider.setValue(player->getPositionRelative());
+        waveDisplay.setPositionRelative(player->getPositionRelative());
+}
 
 void AssemblePane::loadFile(juce::URL audioURL) {
         DBG("AssemblePane::loadFile called");
+        DBG(audioURL.toString(true));
         player->loadUrl(audioURL);
 }
