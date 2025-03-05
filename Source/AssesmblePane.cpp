@@ -102,7 +102,7 @@ void AssemblePane::setupSlider(juce::Slider* component, LookAndFeel* lookAndFeel
 void AssemblePane::setupLabel(juce::Component* target, juce::Label* label, std::string text) {
         addAndMakeVisible(label);
         label->setText(text, juce::dontSendNotification);
-        label->attachToComponent(label, true);
+        label->attachToComponent(target, true);
 };
 
 void AssemblePane::paint(juce::Graphics& g) {
@@ -194,8 +194,11 @@ void AssemblePane::sliderValueChanged(juce::Slider* slider) {
         }
 
         if (slider == &positionSlider) {
-                std::cout << "Position Slider changed" << slider->getValue() << std::endl;
-                player->setPosition(slider->getValue());
+                if ((slider->getValue() - player->getPositionRelative()) > 2) {
+                        player->setPositionRelative(slider->getValue() / 100);
+                } else if (player->getPositionRelative() - slider->getValue() > 2) {
+                        player->setPositionRelative(slider->getValue() / 100);
+                }
         }
 
         if (slider == &dampingSlider) {
