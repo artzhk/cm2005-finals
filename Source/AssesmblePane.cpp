@@ -112,19 +112,14 @@ void AssemblePane::paint(juce::Graphics& g) {
            You should replace everything in this method with your own
            drawing code..
         */
-
-        // g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the
-        // background
         g.fillAll(juce::Colour{62, 95, 138});
 
         g.setColour(juce::Colours::grey);
-        g.drawRect(getLocalBounds(), 1);        // draw an outline around the component
+        g.drawRect(getLocalBounds(), 1);
 
         g.setColour(juce::Colours::navajowhite);
         g.setFont(30.0f);
-        // g.drawText ("DJ Audio", getLocalBounds(),juce::Justification::centred, true);   // draw some placeholder text
-        g.drawText("DJ Audio", 10, 10, getWidth(), 10, juce::Justification::centred,
-                   true);        // draw some placeholder text
+        g.drawText("DJ Audio", 10, 10, getWidth(), 10, juce::Justification::centred, true);
         double len = player->getLengthInSeconds();
         g.drawText(std::to_string(len), 10, 40, getWidth(), 10, juce::Justification::centred, true);
 }
@@ -181,23 +176,24 @@ void AssemblePane::buttonClicked(juce::Button* button) {
 }
 
 void AssemblePane::sliderValueChanged(juce::Slider* slider) {
+        double value = slider->getValue();
         if (slider == &volSlider) {
-                std::cout << slider->getValue() << std::endl;
+                std::cout << value << std::endl;
                 std::cout << "Vol Slider handle" << std::endl;
-                player->setGain(slider->getValue());
+                player->setGain(value);
                 std::cout << "After Vol Slider handle" << std::endl;
         }
 
         if (slider == &speedSlider) {
-                std::cout << "Speed Slider changed" << slider->getValue() << std::endl;
-                player->setSpeed(slider->getValue());
+                std::cout << "Speed Slider changed" << value << std::endl;
+                player->setSpeed(value);
         }
 
         if (slider == &positionSlider) {
-                if ((slider->getValue() - player->getPositionRelative()) > 2) {
-                        player->setPositionRelative(slider->getValue() / 100);
-                } else if (player->getPositionRelative() - slider->getValue() > 2) {
-                        player->setPositionRelative(slider->getValue() / 100);
+                if ((value - player->getPositionRelative()) > 2) {
+                        player->setPositionRelative(value / 100);
+                } else if (player->getPositionRelative() - value > 2) {
+                        player->setPositionRelative(value / 100);
                 }
         }
 
@@ -211,8 +207,7 @@ bool AssemblePane::isInterestedInFileDrag(const juce::StringArray& files) { retu
 void AssemblePane::filesDropped(const juce::StringArray& files, int, int y) {
         DBG("Files dropped");
         if (files.size() == 1) {
-                player->loadUrl(juce::URL{juce::File{files[0]}});        // player calls loadURL function from DJaudio
-                waveDisplay.loadURL(juce::URL{fChooser.getResult()});
+                loadFile(juce::URL{files[0]});
         }
 }
 
@@ -225,4 +220,5 @@ void AssemblePane::loadFile(juce::URL audioURL) {
         DBG("AssemblePane::loadFile called");
         DBG(audioURL.toString(true));
         player->loadUrl(audioURL);
+        waveDisplay.loadURL(juce::URL{fChooser.getResult()});
 }

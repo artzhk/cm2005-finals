@@ -32,15 +32,14 @@ void WaveDisplay::paint(juce::Graphics& g) {
         */
 
         g.fillAll(juce::Colour{220, 220, 220});
-
         g.setColour(juce::Colours::grey);
         g.drawRect(getLocalBounds(), 1);        // draw an outline around the component
 
         g.setColour(juce::Colours::orangered);
         if (fileLoaded) {
-                audioThumb.drawChannel(g, getLocalBounds(), 0, audioThumb.getTotalLength(), 0,
-                                       1.5f);        // g from paint function to draw on canvas within bounds of
-                                                     // waveform compononent (from DeckGUI::resized function)
+                // draw inside waveform component
+                audioThumb.drawChannel(g, getLocalBounds(), 0, audioThumb.getTotalLength(), 0, 1.5f);
+
                 // from 0 to end of audio file
                 g.setColour(juce::Colours::lightgreen);
                 g.drawRect(position * getWidth(), 0, 5, getHeight());
@@ -61,10 +60,10 @@ void WaveDisplay::resized() {
 // DeckGUI needs to tell WaveDisplay when file is ready, from loadButton
 void WaveDisplay::loadURL(juce::URL audioURL) {
         audioThumb.clear();
-        fileLoaded = audioThumb.setSource(
-            new juce::URLInputSource(audioURL));        // getting URL; unpack URL, turn into new input source calling
-                                                        // URLInputSource, then setSource onto audioThumb
+        // getting URL; unpack URL, turn into new input source calling URLInputSource, then setSource onto audioThumb
         // AudioThumbnail::setSource is a boolean; specifies the file or stream that contains the audio file; returns
+        fileLoaded = audioThumb.setSource(new juce::URLInputSource(audioURL));
+
         // True is valid audio source need to call paint to draw the waveform after the file is loaded
         if (fileLoaded) {
                 DBG("Waveform loaded!");
