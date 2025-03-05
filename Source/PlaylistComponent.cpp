@@ -166,6 +166,7 @@ void PlaylistComponent::buttonClicked(juce::Button* button) {
 
 void PlaylistComponent::loadInPlayer(AssemblePane* AssemblePane) {
         int selectedRow{library.getSelectedRow()};
+
         if (selectedRow != -1) {
                 DBG("Adding: " << tracks[selectedRow].title << " to Player");
                 AssemblePane->loadFile(tracks[selectedRow].URL);
@@ -246,8 +247,7 @@ juce::String PlaylistComponent::secondsToMinutes(double seconds) {
         juce::String min{std::to_string(secondsRounded / 60)};
         juce::String sec{std::to_string(secondsRounded % 60)};
 
-        if (sec.length() < 2)        // if seconds is 1 digit or less
-        {
+        if (sec.length() < 2) {
                 // add '0' to seconds until seconds is length 2
                 sec = sec.paddedLeft('0', 2);
         }

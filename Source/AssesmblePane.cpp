@@ -220,5 +220,6 @@ void AssemblePane::loadFile(juce::URL audioURL) {
         DBG("AssemblePane::loadFile called");
         DBG(audioURL.toString(true));
         player->loadUrl(audioURL);
-        waveDisplay.loadURL(juce::URL{fChooser.getResult()});
+        // waveDisplay.loadURL(juce::URL{fChooser.getResult()});
+        waveDisplay.loadURL(audioURL);
 }

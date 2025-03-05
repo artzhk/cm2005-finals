@@ -44,11 +44,11 @@ void AudioPlayer::getNextAudioBlock(const AudioSourceChannelInfo& bufferToFill) 
 
 void AudioPlayer::loadUrl(URL audioUrl) {
         File audioFile = audioUrl.getLocalFile();
-
-        // Enable MP3 support
+        formatManager.registerBasicFormats(); 
 #if JUCE_USE_MP3AUDIOFORMAT
+        // Enable MP3 support
         DBG("MP3 support enabled");
-        formatManager.registerFormat(new MP3AudioFormat(), true);
+        formatManager.registerFormat(new MP3AudioFormat(), true); 
 #endif
 
         if (!audioFile.existsAsFile()) {
@@ -56,7 +56,6 @@ void AudioPlayer::loadUrl(URL audioUrl) {
                 return;
         }
 
-        formatManager.registerBasicFormats(); 
         std::unique_ptr<InputStream> inputStream(audioFile.createInputStream());
 
         AudioFormatReader* reader = formatManager.createReaderFor(audioFile);

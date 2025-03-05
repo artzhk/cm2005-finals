@@ -23,6 +23,8 @@ MainComponent::MainComponent() {
         // addAndMakeVisible(stopButton);
         // addAndMakeVisible(volumeSlider);
         addAndMakeVisible(assemblePane1);
+        addAndMakeVisible(assemblePane2);
+
 
         addAndMakeVisible(playlistComponent);
 
@@ -63,7 +65,8 @@ void MainComponent::resized() {
         std::cout << "This is resized method" << std::endl;
 
         assemblePane1.setBounds(0, 0, getWidth() / 2, getHeight() / 2);
-        assemblePane2.setBounds(getWidth() / 2, getHeight() / 2, getWidth(), getHeight());
+        assemblePane2.setBounds(getWidth() / 2, 0, getWidth() / 2, getHeight() / 2);
+
         playlistComponent.setBounds(5, getHeight() / 2, getWidth() - 10, getHeight() / 2 - 10);
 }
 
