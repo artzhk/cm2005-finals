@@ -4,6 +4,7 @@
 
 #include "AssesmblePane.h"
 #include "AudioPlayer.h"
+#include "PlaylistComponent.h"
 #include "juce_audio_formats/juce_audio_formats.h"
 #include "juce_audio_utils/juce_audio_utils.h"
 #include "juce_core/juce_core.h"
@@ -37,15 +38,21 @@ class MainComponent : public juce::AudioAppComponent {
         // AssemblePane assemblePane2{&player2, formatManager, thumbnailCache};
 
         juce::FileChooser chooser{"Select a file to proccess..." };
+
         //                           juce::File::getSpecialLocation(juce::File::userHomeDirectory),
         //                           "*.wav;*.mp3;*.aiff;*.flac;*.ogg;*.m4a;*.mp4;*.wma;*.ac3;*.aifc;*.caf;*.alac;*.ape;*."
         //                           "mpc;*.ogg;*.opus;*.tta;*.wv;*.dsf;*.dff"};
 
 
-        AudioPlayer player1{formatManager};        // set player1 object of DJAudio class
-        // AudioPlayer player2{formatManager};        // set player2 object of DJAudio class
+        AudioPlayer player1{formatManager};
+        AudioPlayer player2{formatManager};
 
         AssemblePane assemblePane1{&player1, formatManager, thumbnailCache};
+        AssemblePane assemblePane2{&player2, formatManager, thumbnailCache};
+
+        AudioPlayer playMetadata{formatManager};
+        PlaylistComponent playlistComponent{&assemblePane1, &assemblePane2, &playMetadata};
+
         juce::MixerAudioSource mixerSource;
 
         // juce::TextButton playButton{"Hello honey"};

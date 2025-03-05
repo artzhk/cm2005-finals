@@ -24,7 +24,7 @@ class PlaylistComponent : public juce::Component,
                                                                    // PlayListComponent to behave like a table
 {
        public:
-        PlaylistComponent(AssemblePane* _deckGUI1, AssemblePane* _deckGUI2, AudioPlayer* _playerForParsingMetaData);
+        PlaylistComponent(AssemblePane* _assemblePane1, AssemblePane* _assemblePane2, AudioPlayer* _playerForParsingMetaData);
         ~PlaylistComponent() override;
 
         void paint(juce::Graphics&) override;
@@ -54,8 +54,8 @@ class PlaylistComponent : public juce::Component,
         juce::TextButton addToPlayer1Button{"ADD TO LEFT DECK"};
         juce::TextButton addToPlayer2Button{"ADD TO RIGHT DECK"};
 
-        AssemblePane* deckGUI1;
-        AssemblePane* deckGUI2;
+        AssemblePane* assemblePane1;
+        AssemblePane* assemblePane2;
         AudioPlayer* playerForParsingMetaData;
 
         juce::String getLength(juce::URL audioURL);

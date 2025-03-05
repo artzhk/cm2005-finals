@@ -12,11 +12,15 @@
 
 #include <JuceHeader.h>
 
+#include <fstream>
+
+#include "AudioPlayer.h"
+
 //==============================================================================
-PlaylistComponent::PlaylistComponent(AssemblePane* _deckGUI1, AssemblePane* _deckGUI2,
-                                     DJAudio* _playerForParsingMetaData)
-    : deckGUI1(_deckGUI1),
-      deckGUI2(_deckGUI2),
+PlaylistComponent::PlaylistComponent(AssemblePane* _assemblePane1, AssemblePane* _assemblePane2,
+                                     AudioPlayer* _playerForParsingMetaData)
+    : assemblePane1(_assemblePane1),
+      assemblePane2(_assemblePane2),
       playerForParsingMetaData(_playerForParsingMetaData)
 
 {
@@ -55,7 +59,9 @@ PlaylistComponent::PlaylistComponent(AssemblePane* _deckGUI1, AssemblePane* _dec
         library.getHeader().addColumn("Title", 1, 1);
         library.getHeader().addColumn("Length", 2, 1);
         library.getHeader().addColumn("Delete", 3, 1);
+
         library.setModel(this);
+
         loadLibrary();
 }
 
@@ -146,10 +152,10 @@ void PlaylistComponent::buttonClicked(juce::Button* button) {
                 library.updateContent();
         } else if (button == &addToPlayer1Button) {
                 DBG("Add to Player 1 clicked");
-                loadInPlayer(deckGUI1);
+                loadInPlayer(assemblePane1);
         } else if (button == &addToPlayer2Button) {
                 DBG("Add to Player 2 clicked");
-                loadInPlayer(deckGUI2);
+                loadInPlayer(assemblePane2);
         } else {
                 int id = std::stoi(button->getComponentID().toStdString());
                 DBG(tracks[id].title + " removed from Library");
@@ -164,9 +170,9 @@ void PlaylistComponent::loadInPlayer(AssemblePane* AssemblePane) {
                 DBG("Adding: " << tracks[selectedRow].title << " to Player");
                 AssemblePane->loadFile(tracks[selectedRow].URL);
         } else {
-                juce::AlertWindow::showMessageBox(juce::AlertWindow::AlertIconType::InfoIcon,
-                                                  "Add to Deck Information:", "Please select a track to add to deck",
-                                                  "OK", nullptr);
+                juce::AlertWindow::showMessageBoxAsync(
+                    juce::AlertWindow::AlertIconType::InfoIcon,
+                    "Add to Deck Information:", "Please select a track to add to deck", "OK", nullptr);
         }
 }
 
@@ -180,11 +186,9 @@ void PlaylistComponent::importToLibrary() {
                                            juce::FileBrowserComponent::openMode;
 
         fChooser.launchAsync(folderChooserFlags, [this](const juce::FileChooser& chooser) {
-                        const std::vector<juce::File> files{chooser.getResults()};
-        });
+                juce::Array<juce::File> files = chooser.getResults();
 
-        if (chooser.browseForMultipleFilesToOpen()) {
-                for (const juce::File& file : chooser.getResults()) {
+                for (const juce::File& file : files) {
                         juce::String fileNameWithoutExtension{file.getFileNameWithoutExtension()};
                         if (!isInTracks(fileNameWithoutExtension))        // if not already loaded
                         {
@@ -195,12 +199,32 @@ void PlaylistComponent::importToLibrary() {
                                 DBG("loaded file: " << newTrack.title);
                         } else        // display info message
                         {
-                                juce::AlertWindow::showMessageBox(
+                                juce::AlertWindow::showMessageBoxAsync(
                                     juce::AlertWindow::AlertIconType::InfoIcon,
                                     "Load information:", fileNameWithoutExtension + " already loaded", "OK", nullptr);
                         }
                 }
-        }
+        });
+
+        // if (chooser.browseForMultipleFilesToOpen()) {
+        //         for (const juce::File& file : chooser.getResults()) {
+        //                 juce::String fileNameWithoutExtension{file.getFileNameWithoutExtension()};
+        //                 if (!isInTracks(fileNameWithoutExtension))        // if not already loaded
+        //                 {
+        //                         Track newTrack{file};
+        //                         juce::URL audioURL{file};
+        //                         newTrack.length = getLength(audioURL);
+        //                         tracks.push_back(newTrack);
+        //                         DBG("loaded file: " << newTrack.title);
+        //                 } else        // display info message
+        //                 {
+        //                         juce::AlertWindow::showMessageBox(
+        //                             juce::AlertWindow::AlertIconType::InfoIcon,
+        //                             "Load information:", fileNameWithoutExtension + " already loaded", "OK",
+        //                             nullptr);
+        //                 }
+        //         }
+        // }
 }
 
 bool PlaylistComponent::isInTracks(juce::String fileNameWithoutExtension) {
@@ -210,7 +234,7 @@ bool PlaylistComponent::isInTracks(juce::String fileNameWithoutExtension) {
 void PlaylistComponent::deleteFromTracks(int id) { tracks.erase(tracks.begin() + id); }
 
 juce::String PlaylistComponent::getLength(juce::URL audioURL) {
-        playerForParsingMetaData->loadURL(audioURL);
+        playerForParsingMetaData->loadUrl(audioURL);
         double seconds{playerForParsingMetaData->getLengthInSeconds()};
         juce::String minutes{secondsToMinutes(seconds)};
         return minutes;

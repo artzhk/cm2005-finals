@@ -24,6 +24,8 @@ MainComponent::MainComponent() {
         // addAndMakeVisible(volumeSlider);
         addAndMakeVisible(assemblePane1);
 
+        addAndMakeVisible(playlistComponent);
+
         formatManager.registerBasicFormats();
         // playButton.addListener(this);
         // stopButton.addListener(this);
@@ -60,7 +62,9 @@ void MainComponent::resized() {
 
         std::cout << "This is resized method" << std::endl;
 
-        assemblePane1.setBounds(0, 0, getWidth() / 2, getHeight() / 2);        // getWidth() / 2 to set two decks
+        assemblePane1.setBounds(0, 0, getWidth() / 2, getHeight() / 2);
+        assemblePane2.setBounds(getWidth() / 2, getHeight() / 2, getWidth(), getHeight());
+        playlistComponent.setBounds(5, getHeight() / 2, getWidth() - 10, getHeight() / 2 - 10);
 }
 
 void MainComponent::releaseResources() {
@@ -82,7 +86,6 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
 void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) {
         // bufferToFill.clearActiveBufferRegion();
         mixerSource.getNextAudioBlock(bufferToFill);
-
 
         // auto* leftChannel = bufferToFill.buffer->getWritePointer(0, bufferToFill.startSample);
         // auto* rightChannel = bufferToFill.buffer->getWritePointer(0, bufferToFill.startSample);
