@@ -33,9 +33,7 @@ void AudioPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate) 
 
 void AudioPlayer::releaseResources() {
         reverbSource.releaseResources();
-        // transportSource.releaseResources();
         resampleSource.releaseResources();
-        // readerSource->releaseResources();
 }
 
 void AudioPlayer::getNextAudioBlock(const AudioSourceChannelInfo& bufferToFill) {
@@ -66,10 +64,13 @@ void AudioPlayer::loadUrl(URL audioUrl) {
         }
 
         DBG("Audio file loaded: " << audioUrl.toString(true));
+
         // create audio format reader source, when file is read
         std::unique_ptr<juce::AudioFormatReaderSource> newSource(new juce::AudioFormatReaderSource(reader, true));
+
         // control playback of audio
         transportSource.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
+
         // transfer ownership to class variable
         readerSource.reset(newSource.release());
 }

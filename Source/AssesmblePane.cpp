@@ -67,6 +67,8 @@ AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& _form
 
         setupSlider(&positionSlider, &otherLookAndFeel3, positionSliderParams);
         setupLabel(&positionSlider, &positionLabel, "Position");
+        
+        // Setup label for knobs
 
         SliderParams freqKnobParam = {
             .range = {0.0, 100.0},
@@ -137,17 +139,12 @@ void AssemblePane::paint(juce::Graphics& g) {
         g.setColour(juce::Colours::navajowhite);
         g.setFont(30.0f);
         g.drawText("DJ Audio", 10, 10, getWidth(), 10, juce::Justification::centred, true);
-        double len = player->getLengthInSeconds();
-
-        g.drawText(std::to_string(len), 10, 40, getWidth(), 10, juce::Justification::centred, true);
 }
 
 void AssemblePane::resized() {
-        // This method is where you should set the bounds of any child components that your component contains..
-
-        double rowHeight = getHeight() / 12;
+        int rowHeight = getHeight() / 15;
         double width = (getWidth() - 20);
-        auto sliderLeft = 60;
+        int sliderLeftMargin = 60;
 
         auto border = 4;
 
@@ -157,21 +154,24 @@ void AssemblePane::resized() {
 
         double thirdWidth = width / 3;
 
-        playButton.setBounds(15, 40, thirdWidth - 10, rowHeight);
-        stopButton.setBounds(thirdWidth + 15, 40, (width / 3) - 10, rowHeight);
-        loadButton.setBounds(2 * thirdWidth + 15, 40, thirdWidth - 10, rowHeight);
+        playButton.setBounds(15, rowHeight, thirdWidth - 10, rowHeight / 2);
+        stopButton.setBounds(thirdWidth + 15, rowHeight, thirdWidth - 10, rowHeight / 2);
+        loadButton.setBounds(2 * thirdWidth + 15, rowHeight, thirdWidth - 10, rowHeight / 2);
 
-        // setColour(juce::Slider::thumbColourId, juce::Colours::red);
-        volSlider.setBounds(sliderLeft, 10 + (rowHeight * 2), width / 2 - sliderLeft, rowHeight * 4);
-        speedSlider.setBounds(sliderLeft + width / 2, 10 + (rowHeight * 2), width / 2 - sliderLeft, rowHeight * 4);
-        positionSlider.setBounds(sliderLeft, 10 + (rowHeight * 5), width - sliderLeft, rowHeight * 2);
-        dampingSlider.setBounds(sliderLeft, 10 + (rowHeight * 7), width - sliderLeft, rowHeight * 2);
+        volSlider.setBounds(sliderLeftMargin, 10 + playButton.getBounds().getBottom(), width / 2 - sliderLeftMargin,
+                            rowHeight * 2);
+        speedSlider.setBounds(sliderLeftMargin + width / 2, 10 + playButton.getBounds().getBottom(),
+                              width / 2 - sliderLeftMargin, rowHeight * 2);
+        positionSlider.setBounds(sliderLeftMargin, 10 + speedSlider.getBounds().getBottom(), width - sliderLeftMargin,
+                                 rowHeight);
+        dampingSlider.setBounds(sliderLeftMargin, 10 + positionSlider.getBounds().getBottom(), width - sliderLeftMargin,
+                                rowHeight);
 
         // TODO: draw mid/low/high sliders
-        lowSlider.setBounds(sliderLeft, 10 + (rowHeight * 9), width / 3 - sliderLeft, rowHeight * 2);
-        midSlider.setBounds(sliderLeft, 10 + (rowHeight * 9), width / 3 - sliderLeft, rowHeight * 2);
-
-        highSlider.setBounds(sliderLeft, 10 + (rowHeight * 9), width / 3 - sliderLeft, rowHeight * 2);
+        // render in a row view all of them V
+        lowSlider.setBounds(sliderLeftMargin, 10 + positionSlider.getBounds().getBottom(), width / 3 - sliderLeftMargin, rowHeight * 2);
+        midSlider.setBounds(lowSlider.getBounds().getRight(), 10 + positionSlider.getBounds().getBottom(), width / 3 - sliderLeftMargin, rowHeight * 2);
+        highSlider.setBounds(midSlider.getBounds().getRight(), 10 + positionSlider.getBounds().getBottom(), width / 3 - sliderLeftMargin, rowHeight * 2);
 
         waveDisplay.setBounds(5, 8 * (getHeight() / 10), width + 10, rowHeight * 2.2);
 }

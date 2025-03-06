@@ -8,30 +8,14 @@
 MainComponent::MainComponent() {
         setSize(600, 400);
 
-        // if (RuntimePermissions::isRequired(RuntimePermissions::recordAudio) &&
-        //     !RuntimePermissions::isGranted(RuntimePermissions::recordAudio)) {
-        //         RuntimePermissions::request(RuntimePermissions::recordAudio, [&](bool granted) {
-        //                 if (granted) setAudioChannels(2, 2);
-        //         });
-        // } else {
-        //         setAudioChannels(0, 2);
-        // }
-
         setAudioChannels(0, 2);
 
-        // addAndMakeVisible(playButton);
-        // addAndMakeVisible(stopButton);
-        // addAndMakeVisible(volumeSlider);
         addAndMakeVisible(assemblePane1);
         addAndMakeVisible(assemblePane2);
-
 
         addAndMakeVisible(playlistComponent);
 
         formatManager.registerBasicFormats();
-        // playButton.addListener(this);
-        // stopButton.addListener(this);
-        // volumeSlider.addListener(this);
 }
 
 MainComponent::~MainComponent() { shutdownAudio(); }
