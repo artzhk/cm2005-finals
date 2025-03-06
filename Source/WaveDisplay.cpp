@@ -16,39 +16,36 @@
 // constructor
 WaveDisplay::WaveDisplay(juce::AudioFormatManager& formatManagerToUse, juce::AudioThumbnailCache& cacheToUse)
     : audioThumb(1000, formatManagerToUse, cacheToUse), fileLoaded(false), position(0) {
-        // In your constructor, you should add any child components, and initialise any special settings that your
-        // component needs.
-
         audioThumb.addChangeListener(this);
 }
 
 WaveDisplay::~WaveDisplay() {}
 
 void WaveDisplay::paint(juce::Graphics& g) {
-        /* This demo code just fills the component's background and draws some placeholder text to get you started. Only
-           gets called when needed; not continuously
-
-           You should replace everything in this method with your own drawing code..
-        */
-
-        g.fillAll(juce::Colour{220, 220, 220});
+        //background paint
+        g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         g.setColour(juce::Colours::grey);
-        g.drawRect(getLocalBounds(), 1);        // draw an outline around the component
 
-        g.setColour(juce::Colours::orangered);
+        // main stroke colour
+        g.drawRect(getLocalBounds(), 1);
+        g.setColour(juce::Colours::cyan);
+
         if (fileLoaded) {
-                // draw inside waveform component
-                audioThumb.drawChannel(g, getLocalBounds(), 0, audioThumb.getTotalLength(), 0, 1.5f);
+                audioThumb.drawChannel(g, getLocalBounds(), 0, audioThumb.getTotalLength(), 0, 1.0f);
 
-                // from 0 to end of audio file
-                g.setColour(juce::Colours::lightgreen);
-                g.drawRect(position * getWidth(), 0, 5, getHeight());
-                g.fillRect(position * getWidth(), 0, 5, getHeight());
+                g.setOpacity(1);
+                g.setColour(juce::Colours::red);
+                g.fillRect(position, 0, 2, getHeight());
+
+                g.setColour(juce::Colours::darkmagenta);
+                g.setOpacity(0.5f);
+                g.fillRect(0, 0, position, getHeight());
+
+                g.setOpacity(1);
         } else {
-                // g.setFont (30.0f);
-                g.setFont(juce::Font(20.0f, juce::Font::italic));
-                g.drawText("audio waveform to come....", getLocalBounds(), juce::Justification::centred,
-                           true);        // draw some placeholder text
+                g.setFont(16.0f);
+                g.setColour(juce::Colours::yellow);
+                g.drawText("Load a song from the playlist...", getLocalBounds(), juce::Justification::centred, true);
         }
 }
 
@@ -67,15 +64,13 @@ void WaveDisplay::loadURL(juce::URL audioURL) {
         // True is valid audio source need to call paint to draw the waveform after the file is loaded
         if (fileLoaded) {
                 DBG("Waveform loaded!");
+                repaint();
         } else {
                 DBG("WFD: not loaded....");
         }
 }
 
-void WaveDisplay::changeListenerCallback(juce::ChangeBroadcaster* source) {
-        // DBG("changeBroadcaster!");
-        repaint();
-}
+void WaveDisplay::changeListenerCallback(juce::ChangeBroadcaster* source) { repaint(); }
 
 void WaveDisplay::setPositionRelative(double pos) {
         if (pos != position && pos > 0) {

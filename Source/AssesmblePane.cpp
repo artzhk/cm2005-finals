@@ -68,6 +68,23 @@ AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& _form
         setupSlider(&positionSlider, &otherLookAndFeel3, positionSliderParams);
         setupLabel(&positionSlider, &positionLabel, "Position");
 
+        SliderParams freqKnobParam = {
+            .range = {0.0, 100.0},
+            .defaultValue = 50.0,
+            .numDecimalPlaces = 2,
+            .style = juce::Slider::Rotary,
+            .textValueSuffix = new std::string(" % of track"),
+        };
+
+        addAndMakeVisible(lowSlider);
+        setupSlider(&lowSlider, &otherLookAndFeel3, freqKnobParam);
+
+        addAndMakeVisible(midSlider);
+        setupSlider(&midSlider, &otherLookAndFeel3, freqKnobParam);
+
+        addAndMakeVisible(highSlider);
+        setupSlider(&highSlider, &otherLookAndFeel3, freqKnobParam);
+
         addAndMakeVisible(waveDisplay);
 
         startTimer(500);
@@ -121,6 +138,7 @@ void AssemblePane::paint(juce::Graphics& g) {
         g.setFont(30.0f);
         g.drawText("DJ Audio", 10, 10, getWidth(), 10, juce::Justification::centred, true);
         double len = player->getLengthInSeconds();
+
         g.drawText(std::to_string(len), 10, 40, getWidth(), 10, juce::Justification::centred, true);
 }
 
@@ -137,15 +155,23 @@ void AssemblePane::resized() {
 
         auto dialArea = area.removeFromTop(area.getHeight() * 2);
 
-        playButton.setBounds(15, 40, (width / 3) - 10, rowHeight);
-        stopButton.setBounds((width / 3) + 15, 40, (width / 3) - 10, rowHeight);
-        loadButton.setBounds(2 * (width / 3) + 15, 40, (width / 3) - 10, rowHeight);
+        double thirdWidth = width / 3;
+
+        playButton.setBounds(15, 40, thirdWidth - 10, rowHeight);
+        stopButton.setBounds(thirdWidth + 15, 40, (width / 3) - 10, rowHeight);
+        loadButton.setBounds(2 * thirdWidth + 15, 40, thirdWidth - 10, rowHeight);
 
         // setColour(juce::Slider::thumbColourId, juce::Colours::red);
         volSlider.setBounds(sliderLeft, 10 + (rowHeight * 2), width / 2 - sliderLeft, rowHeight * 4);
         speedSlider.setBounds(sliderLeft + width / 2, 10 + (rowHeight * 2), width / 2 - sliderLeft, rowHeight * 4);
         positionSlider.setBounds(sliderLeft, 10 + (rowHeight * 5), width - sliderLeft, rowHeight * 2);
         dampingSlider.setBounds(sliderLeft, 10 + (rowHeight * 7), width - sliderLeft, rowHeight * 2);
+
+        // TODO: draw mid/low/high sliders
+        lowSlider.setBounds(sliderLeft, 10 + (rowHeight * 9), width / 3 - sliderLeft, rowHeight * 2);
+        midSlider.setBounds(sliderLeft, 10 + (rowHeight * 9), width / 3 - sliderLeft, rowHeight * 2);
+
+        highSlider.setBounds(sliderLeft, 10 + (rowHeight * 9), width / 3 - sliderLeft, rowHeight * 2);
 
         waveDisplay.setBounds(5, 8 * (getHeight() / 10), width + 10, rowHeight * 2.2);
 }
@@ -190,6 +216,7 @@ void AssemblePane::sliderValueChanged(juce::Slider* slider) {
         }
 
         if (slider == &positionSlider) {
+                std::cout << "Position Slider changed" << value << std::endl;
                 if ((value - player->getPositionRelative()) > 2) {
                         player->setPositionRelative(value / 100);
                 } else if (player->getPositionRelative() - value > 2) {
@@ -213,13 +240,12 @@ void AssemblePane::filesDropped(const juce::StringArray& files, int, int y) {
 
 void AssemblePane::timerCallback() {
         positionSlider.setValue(player->getPositionRelative());
-        waveDisplay.setPositionRelative(player->getPositionRelative());
+        waveDisplay.setPositionRelative(player->getPositionRelative() * 10);
 }
 
 void AssemblePane::loadFile(juce::URL audioURL) {
         DBG("AssemblePane::loadFile called");
         DBG(audioURL.toString(true));
         player->loadUrl(audioURL);
-        // waveDisplay.loadURL(juce::URL{fChooser.getResult()});
         waveDisplay.loadURL(audioURL);
 }

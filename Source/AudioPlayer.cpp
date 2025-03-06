@@ -44,11 +44,11 @@ void AudioPlayer::getNextAudioBlock(const AudioSourceChannelInfo& bufferToFill) 
 
 void AudioPlayer::loadUrl(URL audioUrl) {
         File audioFile = audioUrl.getLocalFile();
-        formatManager.registerBasicFormats(); 
+        formatManager.registerBasicFormats();
 #if JUCE_USE_MP3AUDIOFORMAT
         // Enable MP3 support
         DBG("MP3 support enabled");
-        formatManager.registerFormat(new MP3AudioFormat(), true); 
+        formatManager.registerFormat(new MP3AudioFormat(), true);
 #endif
 
         if (!audioFile.existsAsFile()) {
@@ -95,12 +95,13 @@ void AudioPlayer::setPositionRelative(double pos) {
                 double posInSecs = transportSource.getLengthInSeconds() * pos;
                 setPosition(posInSecs);
         }
+
         return;
 }
 
 double AudioPlayer::getPositionRelative() {
         if (transportSource.getLengthInSeconds() > 0) {
-                return (transportSource.getCurrentPosition() / transportSource.getLengthInSeconds()) * 100;
+                return (transportSource.getCurrentPosition() * 100 / transportSource.getLengthInSeconds());
         } else {
                 return 0;
         };

@@ -64,10 +64,12 @@ void MainComponent::resized() {
 
         std::cout << "This is resized method" << std::endl;
 
-        assemblePane1.setBounds(0, 0, getWidth() / 2, getHeight() / 2);
-        assemblePane2.setBounds(getWidth() / 2, 0, getWidth() / 2, getHeight() / 2);
+        int panesRowHeight = getHeight() / 3;
 
-        playlistComponent.setBounds(5, getHeight() / 2, getWidth() - 10, getHeight() / 2 - 10);
+        assemblePane1.setBounds(0, 0, getWidth() / 2, panesRowHeight * 2);
+        assemblePane2.setBounds(getWidth() / 2, 0, getWidth() / 2, panesRowHeight * 2);
+
+        playlistComponent.setBounds(5, panesRowHeight * 2, getWidth() - 10, panesRowHeight - 10);
 }
 
 void MainComponent::releaseResources() {

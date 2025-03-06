@@ -48,6 +48,15 @@ class AssemblePane : public juce::Component,
         juce::TextButton stopButton{"Stop"};
         juce::TextButton loadButton{"Load track"};
 
+        juce::Slider midSlider;
+        juce::Label midLabel;
+
+        juce::Slider highSlider;
+        juce::Label highLabel;
+
+        juce::Slider lowSlider;
+        juce::Label lowLabel;
+
         juce::Slider volSlider;
         juce::Label volLabel;
 

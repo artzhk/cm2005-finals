@@ -2,7 +2,7 @@
   ==============================================================================
 
     WaveDisplay.h
-    Created: 2025-03-03 07:13:35
+    Created: 03/03/2025 07:13:35
     Author:  artzhk
 
   ==============================================================================
@@ -34,7 +34,8 @@ class WaveDisplay : public juce::Component,
 
         void loadURL(juce::URL audioURL);
 
-        void setPositionRelative(double pos);        // set the relative position of the playhead
+        // set the relative position of the playhead
+        void setPositionRelative(double pos);
 
        private:
         // AudioThumbnail constructor (to draw waveform share of audio) has three arguments, but
