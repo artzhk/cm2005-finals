@@ -1,6 +1,7 @@
 
 #include "AssesmblePane.h"
 
+#include <memory>
 #include <string>
 
 #include "WaveDisplay.h"
@@ -9,11 +10,9 @@
 
 AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& _formatManagerToUse,
                            juce::AudioThumbnailCache& _cacheToUse)
-    : player(_player), waveDisplay(_formatManagerToUse, _cacheToUse) {
+        : player(_player), waveDisplay(_formatManagerToUse, _cacheToUse), liveAudioVisualiser(new LiveAudioVisualiser()) {
         // In your constructor, you should add any child components, and initialise any special settings that your
         // component needs.
-
-        // TODO: add high mid and low sliders controls
 
         setupButton(&playButton);
         setupButton(&stopButton);
@@ -67,9 +66,8 @@ AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& _form
 
         setupSlider(&positionSlider, &otherLookAndFeel3, positionSliderParams);
         setupLabel(&positionSlider, &positionLabel, "Position");
-        
-        // Setup label for knobs
 
+        // Setup label for knobs
         SliderParams freqKnobParam = {
             .range = {0.0, 100.0},
             .defaultValue = 50.0,
@@ -80,14 +78,27 @@ AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& _form
 
         addAndMakeVisible(lowSlider);
         setupSlider(&lowSlider, &otherLookAndFeel3, freqKnobParam);
+        setupLabel(&lowSlider, &lowLabel, "Low");
 
         addAndMakeVisible(midSlider);
         setupSlider(&midSlider, &otherLookAndFeel3, freqKnobParam);
+        setupLabel(&midSlider, &midLabel, "Mid");
 
         addAndMakeVisible(highSlider);
         setupSlider(&highSlider, &otherLookAndFeel3, freqKnobParam);
+        setupLabel(&highSlider, &highLabel, "Treble");
 
         addAndMakeVisible(waveDisplay);
+
+        if (liveAudioVisualiser == nullptr) {
+                DBG("AssemblePane.cpp::liveAudioVisualiser is null");
+        }
+
+        liveAudioVisualiser->setBufferSize(1024);
+        liveAudioVisualiser->setSamplesPerBlock(16);
+        addAndMakeVisible(*liveAudioVisualiser);
+
+        player->setPlayerVisualiser(liveAudioVisualiser);
 
         startTimer(500);
 }
@@ -125,12 +136,6 @@ void AssemblePane::setupLabel(juce::Component* target, juce::Label* label, std::
 };
 
 void AssemblePane::paint(juce::Graphics& g) {
-        /* This demo code just fills the component's background and
-           draws some placeholder text to get you started.
-
-           You should replace everything in this method with your own
-           drawing code..
-        */
         g.fillAll(juce::Colour{62, 95, 138});
 
         g.setColour(juce::Colours::grey);
@@ -142,38 +147,42 @@ void AssemblePane::paint(juce::Graphics& g) {
 }
 
 void AssemblePane::resized() {
-        int rowHeight = getHeight() / 15;
-        double width = (getWidth() - 20);
+        int rowHeight = getHeight() / 10;
+        double width = getWidth() - 20;
         int sliderLeftMargin = 60;
-
-        auto border = 4;
-
-        auto area = getLocalBounds();
-
-        auto dialArea = area.removeFromTop(area.getHeight() * 2);
 
         double thirdWidth = width / 3;
 
-        playButton.setBounds(15, rowHeight, thirdWidth - 10, rowHeight / 2);
-        stopButton.setBounds(thirdWidth + 15, rowHeight, thirdWidth - 10, rowHeight / 2);
-        loadButton.setBounds(2 * thirdWidth + 15, rowHeight, thirdWidth - 10, rowHeight / 2);
+        // 1st (1) row of buttons
+        playButton.setBounds(15, 0, thirdWidth - 10, rowHeight);
+        stopButton.setBounds(thirdWidth + 15, 0, thirdWidth - 10, rowHeight);
+        loadButton.setBounds(2 * thirdWidth + 15, 0, thirdWidth - 10, rowHeight);
 
+        // 2nd (3) row of rotary sliders
         volSlider.setBounds(sliderLeftMargin, 10 + playButton.getBounds().getBottom(), width / 2 - sliderLeftMargin,
                             rowHeight * 2);
         speedSlider.setBounds(sliderLeftMargin + width / 2, 10 + playButton.getBounds().getBottom(),
                               width / 2 - sliderLeftMargin, rowHeight * 2);
+
+        // 3nd (5) row of rotary sliders
         positionSlider.setBounds(sliderLeftMargin, 10 + speedSlider.getBounds().getBottom(), width - sliderLeftMargin,
                                  rowHeight);
         dampingSlider.setBounds(sliderLeftMargin, 10 + positionSlider.getBounds().getBottom(), width - sliderLeftMargin,
                                 rowHeight);
 
-        // TODO: draw mid/low/high sliders
-        // render in a row view all of them V
-        lowSlider.setBounds(sliderLeftMargin, 10 + positionSlider.getBounds().getBottom(), width / 3 - sliderLeftMargin, rowHeight * 2);
-        midSlider.setBounds(lowSlider.getBounds().getRight(), 10 + positionSlider.getBounds().getBottom(), width / 3 - sliderLeftMargin, rowHeight * 2);
-        highSlider.setBounds(midSlider.getBounds().getRight(), 10 + positionSlider.getBounds().getBottom(), width / 3 - sliderLeftMargin, rowHeight * 2);
+        // 4th (7) row of rotary sliders
+        lowSlider.setBounds(sliderLeftMargin, 10 + positionSlider.getBounds().getBottom(), width / 3 - sliderLeftMargin,
+                            rowHeight * 2);
+        midSlider.setBounds(lowSlider.getBounds().getRight(), 10 + positionSlider.getBounds().getBottom(),
+                            width / 3 - sliderLeftMargin, rowHeight * 2);
+        highSlider.setBounds(midSlider.getBounds().getRight(), 10 + positionSlider.getBounds().getBottom(),
+                             width / 3 - sliderLeftMargin, rowHeight * 2);
 
-        waveDisplay.setBounds(5, 8 * (getHeight() / 10), width + 10, rowHeight * 2.2);
+        // 5th (9) row of wave display
+        waveDisplay.setBounds(5, midSlider.getBounds().getBottom(), width - 10, rowHeight * 2);
+
+        // 6th (10) row of wave display
+        liveAudioVisualiser->setBounds(5, waveDisplay.getBounds().getBottom(), width - 10, rowHeight);
 }
 
 // intended to handle button click listener events
@@ -182,6 +191,7 @@ void AssemblePane::buttonClicked(juce::Button* button) {
                 std::cout << "Play button clicked" << std::endl;
                 int secs = player->getLengthInSeconds();
                 DBG("Length of track: " << secs);
+
                 // player calls start function from DJaudio
                 player->start();
         }
@@ -189,7 +199,6 @@ void AssemblePane::buttonClicked(juce::Button* button) {
                 player->stop();
         }
         if (button == &loadButton) {
-                // juce::FileChooser fChooser{"Select a file..."};
                 constexpr auto folderChooserFlags = FileBrowserComponent::canSelectFiles |
                                                     FileBrowserComponent::openMode;
 
@@ -203,6 +212,7 @@ void AssemblePane::buttonClicked(juce::Button* button) {
 
 void AssemblePane::sliderValueChanged(juce::Slider* slider) {
         double value = slider->getValue();
+
         if (slider == &volSlider) {
                 std::cout << value << std::endl;
                 std::cout << "Vol Slider handle" << std::endl;
@@ -218,9 +228,9 @@ void AssemblePane::sliderValueChanged(juce::Slider* slider) {
         if (slider == &positionSlider) {
                 std::cout << "Position Slider changed" << value << std::endl;
                 if ((value - player->getPositionRelative()) > 2) {
-                        player->setPositionRelative(value / 100);
+                        player->setPositionRelative(value);
                 } else if (player->getPositionRelative() - value > 2) {
-                        player->setPositionRelative(value / 100);
+                        player->setPositionRelative(value);
                 }
         }
 
@@ -240,8 +250,26 @@ void AssemblePane::filesDropped(const juce::StringArray& files, int, int y) {
 
 void AssemblePane::timerCallback() {
         positionSlider.setValue(player->getPositionRelative());
-        waveDisplay.setPositionRelative(player->getPositionRelative() * 10);
+        waveDisplay.setPositionRelative(player->getPositionRelative());
 }
+
+// void AssemblePane::setBuffer(const juce::AudioBuffer<float>& buffer) {
+//         liveAudioVisualiser.pushBuffer(buffer);
+// }
+
+// void AssemblePane::setBuffer() {
+
+//         if (player == nullptr) {
+//                 DBG("AssemblePane.cpp::262: Player is null");
+//         }
+
+//         if (player->getBuffer().buffer == nullptr) {
+//                 DBG("AssemblePane.cpp::262: Buffer is null");
+//         }
+
+//         const AudioBuffer<float> & bufferToPush = *(player->getBuffer().buffer);
+//         liveAudioVisualiser.pushBuffer(bufferToPush);
+// }
 
 void AssemblePane::loadFile(juce::URL audioURL) {
         DBG("AssemblePane::loadFile called");

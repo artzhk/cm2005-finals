@@ -4,7 +4,8 @@
 
 #include <tuple>
 
-#include "AudioPlayer.h"        // to know about this class
+#include "AudioPlayer.h"
+#include "MixerVisualiser.h"
 #include "WaveDisplay.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 
@@ -31,6 +32,9 @@ class AssemblePane : public juce::Component,
 
         // intended to handle to implement Slider::Listener
         void sliderValueChanged(juce::Slider* slider) override;
+
+        // void setBuffer();
+        // void setBuffer(const juce::AudioBuffer<float>& buffer);
 
         bool isInterestedInFileDrag(const juce::StringArray& files) override;
         void filesDropped(const juce::StringArray& files, int, int y) override;
@@ -70,13 +74,12 @@ class AssemblePane : public juce::Component,
         juce::Label positionLabel;
 
         WaveDisplay waveDisplay;
+        std::shared_ptr<LiveAudioVisualiser> liveAudioVisualiser;
 
-        juce::FileChooser fChooser{"Select a file...", File::getSpecialLocation(File::userHomeDirectory), "*.wav;*.mp3;*.aiff"};
-        // std::unique_ptr<juce::FileChooser> fChooser;
+        juce::FileChooser fChooser{"Select a file...", File::getSpecialLocation(File::userHomeDirectory),
+                                   "*.wav;*.mp3;*.aiff"};
 
-        AudioPlayer* player;        // AssemblePane is unaware of audio player;
-                                    // when receive events from buttons, how to send events on to DJAudio player;
-                                    // so need reference with pointer
+        AudioPlayer* player;
 
         struct SliderParams {
                 std::tuple<double, double> range;

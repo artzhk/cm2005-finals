@@ -8,9 +8,6 @@
 using namespace juce;
 
 AudioPlayer::AudioPlayer(AudioFormatManager& _formatManager) : formatManager(_formatManager) {
-        // default values
-
-        // reverb settings
         // 0 - 1 - reverb level
         reverbParameters.roomSize = 0.0f;
         // 0 - 1 - damping level
@@ -27,7 +24,6 @@ AudioPlayer::~AudioPlayer() {}
 
 void AudioPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate) {
         resampleSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
-        reverbSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
         transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
@@ -38,13 +34,26 @@ void AudioPlayer::releaseResources() {
 
 void AudioPlayer::getNextAudioBlock(const AudioSourceChannelInfo& bufferToFill) {
         resampleSource.getNextAudioBlock(bufferToFill);
+
+        if (liveVisualiser == nullptr) {
+                DBG("AudioPlayer::getNextAudioBlock: liveVisualiser is not null");
+        }
+
+        if (liveVisualiser != nullptr) {
+                const juce::AudioBuffer<float> bufferCopy = *bufferToFill.buffer;
+                float magnitude = bufferCopy.getMagnitude(bufferToFill.startSample, bufferToFill.numSamples);
+                // Copy buffer to avoid data corruption
+                juce::MessageManager::callAsync(
+                    [this, bufferCopy, magnitude]() mutable { liveVisualiser->setBuffer(bufferCopy, magnitude); });
+        }
 }
 
 void AudioPlayer::loadUrl(URL audioUrl) {
         File audioFile = audioUrl.getLocalFile();
         formatManager.registerBasicFormats();
-#if JUCE_USE_MP3AUDIOFORMAT
+
         // Enable MP3 support
+#if JUCE_USE_MP3AUDIOFORMAT
         DBG("MP3 support enabled");
         formatManager.registerFormat(new MP3AudioFormat(), true);
 #endif
@@ -55,7 +64,6 @@ void AudioPlayer::loadUrl(URL audioUrl) {
         }
 
         std::unique_ptr<InputStream> inputStream(audioFile.createInputStream());
-
         AudioFormatReader* reader = formatManager.createReaderFor(audioFile);
 
         if (reader == nullptr) {
@@ -100,12 +108,16 @@ void AudioPlayer::setPositionRelative(double pos) {
         return;
 }
 
+void AudioPlayer::setPlayerVisualiser(std::shared_ptr<LiveAudioVisualiser>& _liveVisualiser) {
+        liveVisualiser = _liveVisualiser;
+}
+
 double AudioPlayer::getPositionRelative() {
         if (transportSource.getLengthInSeconds() > 0) {
                 return (transportSource.getCurrentPosition() * 100 / transportSource.getLengthInSeconds());
-        } else {
-                return 0;
-        };
+        }
+
+        return 0;
 }
 
 double AudioPlayer::getLengthInSeconds() { return transportSource.getLengthInSeconds(); }

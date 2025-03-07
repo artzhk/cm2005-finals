@@ -45,7 +45,7 @@ void WaveDisplay::paint(juce::Graphics& g) {
         } else {
                 g.setFont(16.0f);
                 g.setColour(juce::Colours::yellow);
-                g.drawText("Load a song from the playlist...", getLocalBounds(), juce::Justification::centred, true);
+                g.drawText("Select a song from the playlist...", getLocalBounds(), juce::Justification::centred, true);
         }
 }
 

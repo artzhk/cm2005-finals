@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "MixerVisualiser.h"
 #include "juce_audio_basics/juce_audio_basics.h"
 #include "juce_audio_devices/juce_audio_devices.h"
 #include "juce_audio_formats/juce_audio_formats.h"
@@ -11,18 +12,22 @@ using namespace juce;
 class AudioPlayer : public AudioSource {
        public:
         AudioPlayer(AudioFormatManager& _formatManager);
+
         ~AudioPlayer();
         virtual void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
         virtual void releaseResources() override;
         virtual void getNextAudioBlock(const AudioSourceChannelInfo& bufferToFill) override;
 
         void loadUrl(URL audioUrl);
+
         void setGain(double gain);
         void setSpeed(double ratio);
         void setPosition(double posInSecs);
         void setPositionRelative(double pos);
+        void setPlayerVisualiser(std::shared_ptr<LiveAudioVisualiser>& _liveVisualiser);
+
         double getPositionRelative();
-        double getLengthInSeconds();       
+        double getLengthInSeconds();
 
         void start();
         void stop();
@@ -30,11 +35,15 @@ class AudioPlayer : public AudioSource {
        private:
         // Handle audio file formats
         AudioFormatManager& formatManager;
+        // Optional visuliser
+        std::shared_ptr<LiveAudioVisualiser> liveVisualiser;
 
         // Audio playback control and audio volume
         AudioTransportSource transportSource;
+
         // To create on the fly, to read a file once the file is identified, smart pointer requiered by the JUCE
         std::unique_ptr<AudioFormatReaderSource> readerSource;
+
         // Audio speed control
         ResamplingAudioSource resampleSource{&transportSource, false, 2};
         ReverbAudioSource reverbSource{&resampleSource, false};

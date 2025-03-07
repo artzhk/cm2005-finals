@@ -27,18 +27,6 @@ PlaylistComponent::PlaylistComponent(AssemblePane* _assemblePane1, AssemblePane*
         // In your constructor, you should add any child components, and initialise any special settings that your
         // component needs.
 
-        // trackTitles.push_back("Black Dog");
-        // trackTitles.push_back("Lemon Song");
-        // trackTitles.push_back("Dazed and Confused");
-        // trackTitles.push_back("Out on the Tiles");
-        // trackTitles.push_back("Wearing and Tearing");
-        // trackTitles.push_back("Boogie with Stu");
-
-        // tableComponent.getHeader().addColumn("Title", 1, 180);
-        // tableComponent.getHeader().addColumn("Artist", 2, 140);
-        // tableComponent.getHeader().addColumn("", 3, 80);
-        // tableComponent.setModel(this);
-
         addAndMakeVisible(tableComponent);
 
         addAndMakeVisible(importButton);
@@ -49,6 +37,7 @@ PlaylistComponent::PlaylistComponent(AssemblePane* _assemblePane1, AssemblePane*
 
         importButton.addListener(this);
         searchField.addListener(this);
+
         addToPlayer1Button.addListener(this);
         addToPlayer2Button.addListener(this);
 
@@ -206,26 +195,6 @@ void PlaylistComponent::importToLibrary() {
                         }
                 }
         });
-
-        // if (chooser.browseForMultipleFilesToOpen()) {
-        //         for (const juce::File& file : chooser.getResults()) {
-        //                 juce::String fileNameWithoutExtension{file.getFileNameWithoutExtension()};
-        //                 if (!isInTracks(fileNameWithoutExtension))        // if not already loaded
-        //                 {
-        //                         Track newTrack{file};
-        //                         juce::URL audioURL{file};
-        //                         newTrack.length = getLength(audioURL);
-        //                         tracks.push_back(newTrack);
-        //                         DBG("loaded file: " << newTrack.title);
-        //                 } else        // display info message
-        //                 {
-        //                         juce::AlertWindow::showMessageBox(
-        //                             juce::AlertWindow::AlertIconType::InfoIcon,
-        //                             "Load information:", fileNameWithoutExtension + " already loaded", "OK",
-        //                             nullptr);
-        //                 }
-        //         }
-        // }
 }
 
 bool PlaylistComponent::isInTracks(juce::String fileNameWithoutExtension) {
