@@ -94,7 +94,7 @@ int PlaylistComponent::getNumRows() { return tracks.size(); }
 void PlaylistComponent::paintRowBackground(juce::Graphics& g, int rowNumber, int width, int height,
                                            bool rowIsSelected) {
         if (rowIsSelected) {
-                g.fillAll(juce::Colours::yellow);
+                g.fillAll(juce::Colours::bisque);
         } else {
                 g.fillAll(juce::Colours::darkslateblue);
         }
@@ -123,7 +123,7 @@ PlaylistComponent::Component* PlaylistComponent::refreshComponentForCell(
 
                         btn->addListener(this);
                         existingComponentToUpdate = btn;
-                        btn->setColour(juce::TextButton::buttonColourId, juce::Colours::darkslategrey);
+                        btn->setColour(juce::TextButton::buttonColourId, juce::Colours::red);
                 }
         }
         return existingComponentToUpdate;

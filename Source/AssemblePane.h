@@ -52,15 +52,6 @@ class AssemblePane : public juce::Component,
         juce::TextButton stopButton{"Stop"};
         juce::TextButton loadButton{"Load track"};
 
-        juce::Slider midSlider;
-        juce::Label midLabel;
-
-        juce::Slider highSlider;
-        juce::Label highLabel;
-
-        juce::Slider lowSlider;
-        juce::Label lowLabel;
-
         juce::Slider volSlider;
         juce::Label volLabel;
 
@@ -72,6 +63,19 @@ class AssemblePane : public juce::Component,
 
         juce::Slider positionSlider;
         juce::Label positionLabel;
+
+
+        juce::Slider bassSlider;
+        juce::Label bassLabel;
+
+        juce::Slider midSlider;
+        juce::Label midLabel;
+
+        juce::Slider trembleSlider;
+        juce::Label trembleLabel;
+
+        juce::Slider freqSlider;
+        juce::Label freqLabel;
 
         WaveDisplay waveDisplay;
         std::shared_ptr<LiveAudioVisualiser> liveAudioVisualiser;

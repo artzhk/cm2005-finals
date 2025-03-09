@@ -1,13 +1,14 @@
 #include "MixerVisualiser.h"
 #include "juce_audio_basics/juce_audio_basics.h"
+#include "juce_graphics/juce_graphics.h"
 
 LiveAudioVisualiser::LiveAudioVisualiser() : juce::AudioVisualiserComponent(2) {
         setBufferSize(1024);
         setSamplesPerBlock(16);
-        setColours(juce::Colours::black, juce::Colours::red);
+        setColours(juce::Colours::black, juce::Colours::pink);
 }
 
-LiveAudioVisualiser::~LiveAudioVisualiser() {};
+LiveAudioVisualiser::~LiveAudioVisualiser() { };
 
 void LiveAudioVisualiser::paint(juce::Graphics& g) {
         AudioVisualiserComponent::paint(g);
@@ -27,7 +28,7 @@ void LiveAudioVisualiser::paint(juce::Graphics& g) {
 void LiveAudioVisualiser::setBuffer(const juce::AudioBuffer<float>& buffer, float magnitude) {
         // Use pushBuffer to automatically calculate and visualize the waveform
         pushBuffer(buffer);
-        // currentVolume = buffer.buffer->getMagnitude(buffer.startSample, buffer.numSamples);
+        currentVolume = magnitude;
         repaint();
         return;
 }

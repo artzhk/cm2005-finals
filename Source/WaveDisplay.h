@@ -19,12 +19,13 @@
  * interface to listen for changes in the audio thumbnail.
  */
 class WaveDisplay : public juce::Component,
-                    public juce::ChangeListener        // add ChangeBroadcaster listener to inheritance definition
-{
+                    // add ChangeBroadcaster listener to inheritance definition
+                    public juce::ChangeListener {
        public:
         WaveDisplay(juce::AudioFormatManager& formatManagerToUse,
                     juce::AudioThumbnailCache&
-                        cacheToUse);        // constructor with AudioFormatManager and the thumbnail cache
+                        // constructor with AudioFormatManager and the thumbnail cache
+                        cacheToUse);
         ~WaveDisplay() override;
 
         void paint(juce::Graphics&) override;
@@ -38,11 +39,6 @@ class WaveDisplay : public juce::Component,
         void setPositionRelative(double pos);
 
        private:
-        // AudioThumbnail constructor (to draw waveform share of audio) has three arguments, but
-        // do not have access to incoming data coming into my constructor (WaveDisplay
-        // so need to add it to initialization list in the constructor file >> audioThumb(1000, formatManagerToUse,
-        // cacheToUse) only want 1 instance of AudioFormatManager and AudioThumbnailCache since the cache is shared
-        // between any audio thumbnails; both will be part of Main Component where data is stored
         juce::AudioThumbnail audioThumb;
         bool fileLoaded;
         double position;

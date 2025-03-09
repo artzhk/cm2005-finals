@@ -10,7 +10,7 @@
 
 #include <JuceHeader.h>
 
-#include "AssesmblePane.h"
+#include "AssemblePane.h"
 #include "Track.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 

@@ -11,6 +11,7 @@
 #include "WaveDisplay.h"
 
 #include <JuceHeader.h>
+#include "juce_graphics/juce_graphics.h"
 
 //==============================================================================
 // constructor
@@ -22,24 +23,25 @@ WaveDisplay::WaveDisplay(juce::AudioFormatManager& formatManagerToUse, juce::Aud
 WaveDisplay::~WaveDisplay() {}
 
 void WaveDisplay::paint(juce::Graphics& g) {
-        //background paint
+        int relativePosition = (getWidth() * position) / 100;
+        // background paint
         g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         g.setColour(juce::Colours::grey);
 
         // main stroke colour
         g.drawRect(getLocalBounds(), 1);
-        g.setColour(juce::Colours::cyan);
+        g.setColour(juce::Colours::ghostwhite);
 
         if (fileLoaded) {
                 audioThumb.drawChannel(g, getLocalBounds(), 0, audioThumb.getTotalLength(), 0, 1.0f);
 
                 g.setOpacity(1);
                 g.setColour(juce::Colours::red);
-                g.fillRect(position, 0, 2, getHeight());
+                g.fillRect(relativePosition, 0, 2, getHeight());
 
                 g.setColour(juce::Colours::darkmagenta);
                 g.setOpacity(0.5f);
-                g.fillRect(0, 0, position, getHeight());
+                g.fillRect(0, 0, relativePosition, getHeight());
 
                 g.setOpacity(1);
         } else {
@@ -49,19 +51,12 @@ void WaveDisplay::paint(juce::Graphics& g) {
         }
 }
 
-void WaveDisplay::resized() {
-        // This method is where you should set the bounds of any child
-        // components that your component contains..
-}
+void WaveDisplay::resized() {}
 
-// DeckGUI needs to tell WaveDisplay when file is ready, from loadButton
 void WaveDisplay::loadURL(juce::URL audioURL) {
         audioThumb.clear();
-        // getting URL; unpack URL, turn into new input source calling URLInputSource, then setSource onto audioThumb
-        // AudioThumbnail::setSource is a boolean; specifies the file or stream that contains the audio file; returns
         fileLoaded = audioThumb.setSource(new juce::URLInputSource(audioURL));
 
-        // True is valid audio source need to call paint to draw the waveform after the file is loaded
         if (fileLoaded) {
                 DBG("Waveform loaded!");
                 repaint();

@@ -2,7 +2,6 @@
 
 #include <JuceHeader.h>
 
-#include "AssesmblePane.h"
 #include "AudioPlayer.h"
 #include "PlaylistComponent.h"
 #include "juce_audio_formats/juce_audio_formats.h"
@@ -22,10 +21,10 @@ class MainComponent : public juce::AudioAppComponent {
         ~MainComponent() override;
 
         //==============================================================================
-        void paint(juce::Graphics &) override;
+        void paint(juce::Graphics&) override;
         void resized() override;
 
-        void getNextAudioBlock(const juce::AudioSourceChannelInfo &bufferToFill) override;
+        void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) override;
         void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
         void releaseResources() override;
 
@@ -33,7 +32,7 @@ class MainComponent : public juce::AudioAppComponent {
         juce::AudioFormatManager formatManager;
         juce::AudioThumbnailCache thumbnailCache{100};
 
-        juce::FileChooser chooser{"Select a file to proccess..." };
+        juce::FileChooser chooser{"Select a file to proccess..."};
 
         AudioPlayer player1{formatManager};
         AudioPlayer player2{formatManager};

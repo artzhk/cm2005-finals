@@ -1,6 +1,7 @@
 
-#include "AssesmblePane.h"
+#include "AssemblePane.h"
 
+#include <cstdlib>
 #include <memory>
 #include <string>
 
@@ -10,7 +11,7 @@
 
 AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& _formatManagerToUse,
                            juce::AudioThumbnailCache& _cacheToUse)
-        : player(_player), waveDisplay(_formatManagerToUse, _cacheToUse), liveAudioVisualiser(new LiveAudioVisualiser()) {
+    : player(_player), waveDisplay(_formatManagerToUse, _cacheToUse), liveAudioVisualiser(new LiveAudioVisualiser()) {
         // In your constructor, you should add any child components, and initialise any special settings that your
         // component needs.
 
@@ -46,8 +47,8 @@ AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& _form
         setupLabel(&speedSlider, &speedLabel, "Speed");
 
         SliderParams dampingSliderParams = {
-            .range = {1, 1000.0},
-            .defaultValue = 10.0,
+            .range = {0.0, 1.0},
+            .defaultValue = 0.0,
             .numDecimalPlaces = 2,
             .style = juce::Slider::LinearHorizontal,
             .textValueSuffix = new std::string(" factor"),
@@ -68,26 +69,45 @@ AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& _form
         setupLabel(&positionSlider, &positionLabel, "Position");
 
         // Setup label for knobs
-        SliderParams freqKnobParam = {
-            .range = {0.0, 100.0},
-            .defaultValue = 50.0,
-            .numDecimalPlaces = 2,
+        SliderParams bassKnobParam = {
+            .range = {-24.0, 24.0},
+            .defaultValue = 0.0,
+            .numDecimalPlaces = 1,
             .style = juce::Slider::Rotary,
-            .textValueSuffix = new std::string(" % of track"),
+            .textValueSuffix = new std::string("Bass"),
         };
 
-        addAndMakeVisible(lowSlider);
-        setupSlider(&lowSlider, &otherLookAndFeel3, freqKnobParam);
-        setupLabel(&lowSlider, &lowLabel, "Low");
+        // Setup label for knobs
+        SliderParams midKnobParam = {
+            .range = {-24.0, 24.0},
+            .defaultValue = 0.0,
+            .numDecimalPlaces = 1,
+            .style = juce::Slider::Rotary,
+            .textValueSuffix = new std::string("Mid"),
+        };
 
-        addAndMakeVisible(midSlider);
-        setupSlider(&midSlider, &otherLookAndFeel3, freqKnobParam);
-        setupLabel(&midSlider, &midLabel, "Mid");
+        // Setup label for knobs
+        SliderParams trembleKnobParam = {
+            .range = {-24.0, 24.0},
+            .defaultValue = 0.0,
+            .numDecimalPlaces = 1,
+            .style = juce::Slider::Rotary,
+            .textValueSuffix = new std::string("Tremble"),
+        };
 
-        addAndMakeVisible(highSlider);
-        setupSlider(&highSlider, &otherLookAndFeel3, freqKnobParam);
-        setupLabel(&highSlider, &highLabel, "Treble");
+        setupSlider(&bassSlider,  &otherLookAndFeel2, bassKnobParam);
+        setupSlider(&midSlider, &otherLookAndFeel1, midKnobParam);
+        setupSlider(&trembleSlider, &otherLookAndFeel1, trembleKnobParam);
 
+        SliderParams freqSliderParams = {
+            .range = {20.0, 20000.0},
+            .defaultValue = 20.0,
+            .numDecimalPlaces = 0,
+            .style = juce::Slider::Rotary,
+            .textValueSuffix = new std::string(" Hz"),
+        };
+
+        setupSlider(&freqSlider, &otherLookAndFeel1, freqSliderParams);
         addAndMakeVisible(waveDisplay);
 
         if (liveAudioVisualiser == nullptr) {
@@ -96,8 +116,8 @@ AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& _form
 
         liveAudioVisualiser->setBufferSize(1024);
         liveAudioVisualiser->setSamplesPerBlock(16);
-        addAndMakeVisible(*liveAudioVisualiser);
 
+        addAndMakeVisible(*liveAudioVisualiser);
         player->setPlayerVisualiser(liveAudioVisualiser);
 
         startTimer(500);
@@ -136,7 +156,7 @@ void AssemblePane::setupLabel(juce::Component* target, juce::Label* label, std::
 };
 
 void AssemblePane::paint(juce::Graphics& g) {
-        g.fillAll(juce::Colour{62, 95, 138});
+        g.fillAll(juce::Colour{122, 95, 138});
 
         g.setColour(juce::Colours::grey);
         g.drawRect(getLocalBounds(), 1);
@@ -171,15 +191,16 @@ void AssemblePane::resized() {
                                 rowHeight);
 
         // 4th (7) row of rotary sliders
-        lowSlider.setBounds(sliderLeftMargin, 10 + positionSlider.getBounds().getBottom(), width / 3 - sliderLeftMargin,
-                            rowHeight * 2);
-        midSlider.setBounds(lowSlider.getBounds().getRight(), 10 + positionSlider.getBounds().getBottom(),
+        bassSlider.setBounds(sliderLeftMargin, 10 + dampingSlider.getBounds().getBottom(), width / 3 - sliderLeftMargin,
+                             rowHeight * 2);
+        midSlider.setBounds(bassSlider.getBounds().getRight(), 10 + dampingSlider.getBounds().getBottom(),
                             width / 3 - sliderLeftMargin, rowHeight * 2);
-        highSlider.setBounds(midSlider.getBounds().getRight(), 10 + positionSlider.getBounds().getBottom(),
-                             width / 3 - sliderLeftMargin, rowHeight * 2);
+        trembleSlider.setBounds(midSlider.getBounds().getRight(), 10 + dampingSlider.getBounds().getBottom(),
+                                width / 3 - sliderLeftMargin, rowHeight * 2);
+
 
         // 5th (9) row of wave display
-        waveDisplay.setBounds(5, midSlider.getBounds().getBottom(), width - 10, rowHeight * 2);
+        waveDisplay.setBounds(5, trembleSlider.getBounds().getBottom(), width - 10, rowHeight * 2);
 
         // 6th (10) row of wave display
         liveAudioVisualiser->setBounds(5, waveDisplay.getBounds().getBottom(), width - 10, rowHeight);
@@ -227,15 +248,24 @@ void AssemblePane::sliderValueChanged(juce::Slider* slider) {
 
         if (slider == &positionSlider) {
                 std::cout << "Position Slider changed" << value << std::endl;
-                if ((value - player->getPositionRelative()) > 2) {
-                        player->setPositionRelative(value);
-                } else if (player->getPositionRelative() - value > 2) {
-                        player->setPositionRelative(value);
+                // player->setPositionRelative(value);
+                if (abs(value - player->getPositionRelative()) > 2) {
+                        player->setPositionRelative(value / 100);
                 }
         }
-
         if (slider == &dampingSlider) {
-                DBG("Damping Slider changed" << slider->getValue());
+                std::cout << "Damping Slider changed" << value << std::endl;
+                player->setDamping(value);
+        }
+
+        if (slider == &bassSlider) {
+                std::cout << "Bass Slider changed" << value << std::endl;
+                player->setBassGain(value);
+        }
+
+        if (slider == &trembleSlider) {
+                std::cout << "Tremble Slider changed" << value << std::endl;
+                player->setTrebleGain(value);
         }
 }
 
@@ -252,24 +282,6 @@ void AssemblePane::timerCallback() {
         positionSlider.setValue(player->getPositionRelative());
         waveDisplay.setPositionRelative(player->getPositionRelative());
 }
-
-// void AssemblePane::setBuffer(const juce::AudioBuffer<float>& buffer) {
-//         liveAudioVisualiser.pushBuffer(buffer);
-// }
-
-// void AssemblePane::setBuffer() {
-
-//         if (player == nullptr) {
-//                 DBG("AssemblePane.cpp::262: Player is null");
-//         }
-
-//         if (player->getBuffer().buffer == nullptr) {
-//                 DBG("AssemblePane.cpp::262: Buffer is null");
-//         }
-
-//         const AudioBuffer<float> & bufferToPush = *(player->getBuffer().buffer);
-//         liveAudioVisualiser.pushBuffer(bufferToPush);
-// }
 
 void AssemblePane::loadFile(juce::URL audioURL) {
         DBG("AssemblePane::loadFile called");

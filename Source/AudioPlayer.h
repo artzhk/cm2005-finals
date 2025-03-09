@@ -29,14 +29,30 @@ class AudioPlayer : public AudioSource {
         double getPositionRelative();
         double getLengthInSeconds();
 
+        void setBassGain(float gain);
+        void setMidGain(float gain);
+        void setTrebleGain(float gain);
+        void setDamping(float damping);
+
         void start();
         void stop();
 
        private:
+        double currentSampleRate = 44100.0;
         // Handle audio file formats
         AudioFormatManager& formatManager;
         // Optional visuliser
         std::shared_ptr<LiveAudioVisualiser> liveVisualiser;
+
+        float bassGain{1.0f}, midGain{1.0f}, trebleGain{1.0f};
+        // juce::dsp::IIR::Filter<float> bassFilter, midFilter, trebleFilter;
+
+        juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>>
+            bassFilterDuplicator;
+        juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>>
+            midFilterDuplicator;
+        juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>>
+            trebleFilterDuplicator;
 
         // Audio playback control and audio volume
         AudioTransportSource transportSource;
