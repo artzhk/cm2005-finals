@@ -1,4 +1,3 @@
-
 #include "AssemblePane.h"
 
 #include <cstdlib>
@@ -12,40 +11,41 @@
 AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& _formatManagerToUse,
                            juce::AudioThumbnailCache& _cacheToUse)
     : player(_player), waveDisplay(_formatManagerToUse, _cacheToUse), liveAudioVisualiser(new LiveAudioVisualiser()) {
-        // In your constructor, you should add any child components, and initialise any special settings that your
-        // component needs.
-
+        // Set up buttons and initialize look and feel for the sliders
         setupButton(&playButton);
         setupButton(&stopButton);
         setupButton(&loadButton);
 
+        // Configure different slider styles and colors for visual consistency
         otherLookAndFeel1.setColour(juce::Slider::thumbColourId, juce::Colours::orangered);
         otherLookAndFeel2.setColour(juce::Slider::thumbColourId, juce::Colours::forestgreen);
         otherLookAndFeel3.setColour(juce::Slider::thumbColourId, juce::Colours::cornflowerblue);
 
+        // Add sliders for volume, position, speed, damping, and others to the component
         addAndMakeVisible(speedSlider);
         addAndMakeVisible(positionSlider);
 
+        // Set up volume slider with defined range and style
         SliderParams volSliderParams = {
             .range = {0.0, 1.0},
             .defaultValue = 0.5,
             .numDecimalPlaces = 2,
             .style = juce::Slider::LinearVertical,
         };
-
         setupSlider(&volSlider, &otherLookAndFeel1, volSliderParams);
         setupLabel(&volSlider, &volLabel, "Volume");
 
+        // Set up speed slider with defined range and style
         SliderParams speedSliderParams = {
             .range = {0.1, 2.0},
             .defaultValue = 1.0,
             .numDecimalPlaces = 2,
             .style = juce::Slider::Rotary,
         };
-
         setupSlider(&speedSlider, &otherLookAndFeel2, speedSliderParams);
         setupLabel(&speedSlider, &speedLabel, "Speed");
 
+        // Set up damping slider with defined range and style
         SliderParams dampingSliderParams = {
             .range = {0.0, 1.0},
             .defaultValue = 0.0,
@@ -53,10 +53,10 @@ AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& _form
             .style = juce::Slider::LinearHorizontal,
             .textValueSuffix = new std::string(" factor"),
         };
-
         setupSlider(&dampingSlider, &otherLookAndFeel3, dampingSliderParams);
         setupLabel(&dampingSlider, &dampingLabel, "Damping");
 
+        // Set up position slider with defined range and style
         SliderParams positionSliderParams = {
             .range = {0.0, 100.0},
             .defaultValue = 10.0,
@@ -64,11 +64,10 @@ AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& _form
             .style = juce::Slider::LinearHorizontal,
             .textValueSuffix = new std::string(" % of track"),
         };
-
         setupSlider(&positionSlider, &otherLookAndFeel3, positionSliderParams);
         setupLabel(&positionSlider, &positionLabel, "Position");
 
-        // Setup label for knobs
+        // Set up additional knobs for bass, mid, and tremble adjustments
         SliderParams bassKnobParam = {
             .range = {-24.0, 24.0},
             .defaultValue = 0.0,
@@ -77,7 +76,6 @@ AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& _form
             .textValueSuffix = new std::string("Bass"),
         };
 
-        // Setup label for knobs
         SliderParams midKnobParam = {
             .range = {-24.0, 24.0},
             .defaultValue = 0.0,
@@ -86,7 +84,6 @@ AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& _form
             .textValueSuffix = new std::string("Mid"),
         };
 
-        // Setup label for knobs
         SliderParams trembleKnobParam = {
             .range = {-24.0, 24.0},
             .defaultValue = 0.0,
@@ -99,6 +96,7 @@ AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& _form
         setupSlider(&midSlider, &otherLookAndFeel1, midKnobParam);
         setupSlider(&trembleSlider, &otherLookAndFeel1, trembleKnobParam);
 
+        // Set up frequency slider with defined range and style
         SliderParams freqSliderParams = {
             .range = {20.0, 20000.0},
             .defaultValue = 20.0,
@@ -106,10 +104,12 @@ AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& _form
             .style = juce::Slider::Rotary,
             .textValueSuffix = new std::string(" Hz"),
         };
-
         setupSlider(&freqSlider, &otherLookAndFeel1, freqSliderParams);
+
+        // Add wave display and visualizer to the component
         addAndMakeVisible(waveDisplay);
 
+        // Initialize the live audio visualizer and configure its settings
         if (liveAudioVisualiser == nullptr) {
                 DBG("AssemblePane.cpp::liveAudioVisualiser is null");
         }
@@ -120,16 +120,23 @@ AssemblePane::AssemblePane(AudioPlayer* _player, juce::AudioFormatManager& _form
         addAndMakeVisible(*liveAudioVisualiser);
         player->setPlayerVisualiser(liveAudioVisualiser);
 
+        // Start a timer for periodic updates (e.g., position tracking)
         startTimer(500);
 }
 
 AssemblePane::~AssemblePane() {};
 
+/**
+ * Sets up a button, making it visible and adding it to the component's event listener.
+ */
 void AssemblePane::setupButton(juce::Button* component) {
         addAndMakeVisible(component);
         component->addListener(this);
 };
 
+/**
+ * Configures a slider with specified parameters, look and feel, and style.
+ */
 void AssemblePane::setupSlider(juce::Slider* component, LookAndFeel* lookAndFeel, SliderParams params) {
         addAndMakeVisible(component);
         component->addListener(this);
@@ -143,18 +150,26 @@ void AssemblePane::setupSlider(juce::Slider* component, LookAndFeel* lookAndFeel
         component->setTextBoxStyle(juce::Slider::TextBoxLeft, false, component->getTextBoxWidth(),
                                    component->getTextBoxHeight());
 
+        // Set suffix if provided for slider text value
         if (params.textValueSuffix != nullptr) {
                 component->setTextValueSuffix(*params.textValueSuffix);
                 DBG(*params.textValueSuffix);
         }
 };
 
+/**
+ * Attaches a label to a component and makes the label visible.
+ */
 void AssemblePane::setupLabel(juce::Component* target, juce::Label* label, std::string text) {
         addAndMakeVisible(label);
         label->setText(text, juce::dontSendNotification);
         label->attachToComponent(target, true);
 };
 
+/**
+ * Paints the background and visual elements on the component.
+ * @param g The graphics context used to render the component.
+ */
 void AssemblePane::paint(juce::Graphics& g) {
         g.fillAll(juce::Colour{122, 95, 138});
 
@@ -166,6 +181,9 @@ void AssemblePane::paint(juce::Graphics& g) {
         g.drawText("DJ Audio", 10, 10, getWidth(), 10, juce::Justification::centred, true);
 }
 
+/**
+ * Resizes and arranges child components within the AssemblePane.
+ */
 void AssemblePane::resized() {
         int rowHeight = getHeight() / 10;
         double width = getWidth() - 20;
@@ -173,24 +191,24 @@ void AssemblePane::resized() {
 
         double thirdWidth = width / 3;
 
-        // 1st (1) row of buttons
+        // Position buttons
         playButton.setBounds(15, 0, thirdWidth - 10, rowHeight);
         stopButton.setBounds(thirdWidth + 15, 0, thirdWidth - 10, rowHeight);
         loadButton.setBounds(2 * thirdWidth + 15, 0, thirdWidth - 10, rowHeight);
 
-        // 2nd (3) row of rotary sliders
+        // Position rotary sliders
         volSlider.setBounds(sliderLeftMargin, 10 + playButton.getBounds().getBottom(), width / 2 - sliderLeftMargin,
                             rowHeight * 2);
         speedSlider.setBounds(sliderLeftMargin + width / 2, 10 + playButton.getBounds().getBottom(),
                               width / 2 - sliderLeftMargin, rowHeight * 2);
 
-        // 3nd (5) row of rotary sliders
+        // Position horizontal sliders
         positionSlider.setBounds(sliderLeftMargin, 10 + speedSlider.getBounds().getBottom(), width - sliderLeftMargin,
                                  rowHeight);
         dampingSlider.setBounds(sliderLeftMargin, 10 + positionSlider.getBounds().getBottom(), width - sliderLeftMargin,
                                 rowHeight);
 
-        // 4th (7) row of rotary sliders
+        // Position bass, mid, and tremble sliders
         bassSlider.setBounds(sliderLeftMargin, 10 + dampingSlider.getBounds().getBottom(), width / 3 - sliderLeftMargin,
                              rowHeight * 2);
         midSlider.setBounds(bassSlider.getBounds().getRight(), 10 + dampingSlider.getBounds().getBottom(),
@@ -198,22 +216,21 @@ void AssemblePane::resized() {
         trembleSlider.setBounds(midSlider.getBounds().getRight(), 10 + dampingSlider.getBounds().getBottom(),
                                 width / 3 - sliderLeftMargin, rowHeight * 2);
 
-
-        // 5th (9) row of wave display
+        // Position wave display and visualizer
         waveDisplay.setBounds(5, trembleSlider.getBounds().getBottom(), width - 10, rowHeight * 2);
-
-        // 6th (10) row of wave display
         liveAudioVisualiser->setBounds(5, waveDisplay.getBounds().getBottom(), width - 10, rowHeight);
 }
 
-// intended to handle button click listener events
+/**
+ * Handles button click events for play, stop, and load buttons.
+ */
 void AssemblePane::buttonClicked(juce::Button* button) {
         if (button == &playButton) {
                 std::cout << "Play button clicked" << std::endl;
                 int secs = player->getLengthInSeconds();
                 DBG("Length of track: " << secs);
 
-                // player calls start function from DJaudio
+                // Start playback from the player
                 player->start();
         }
         if (button == &stopButton) {
@@ -231,14 +248,15 @@ void AssemblePane::buttonClicked(juce::Button* button) {
         }
 }
 
+/**
+ * Handles slider value change events for adjusting various audio parameters.
+ */
 void AssemblePane::sliderValueChanged(juce::Slider* slider) {
         double value = slider->getValue();
 
         if (slider == &volSlider) {
                 std::cout << value << std::endl;
-                std::cout << "Vol Slider handle" << std::endl;
                 player->setGain(value);
-                std::cout << "After Vol Slider handle" << std::endl;
         }
 
         if (slider == &speedSlider) {
@@ -248,7 +266,6 @@ void AssemblePane::sliderValueChanged(juce::Slider* slider) {
 
         if (slider == &positionSlider) {
                 std::cout << "Position Slider changed" << value << std::endl;
-                // player->setPositionRelative(value);
                 if (abs(value - player->getPositionRelative()) > 2) {
                         player->setPositionRelative(value / 100);
                 }
@@ -269,8 +286,14 @@ void AssemblePane::sliderValueChanged(juce::Slider* slider) {
         }
 }
 
+/**
+ * Handles file drag events (currently not implemented).
+ */
 bool AssemblePane::isInterestedInFileDrag(const juce::StringArray& files) { return false; }
 
+/**
+ * Handles file drop events to load a dropped audio file.
+ */
 void AssemblePane::filesDropped(const juce::StringArray& files, int, int y) {
         DBG("Files dropped");
         if (files.size() == 1) {
@@ -278,11 +301,17 @@ void AssemblePane::filesDropped(const juce::StringArray& files, int, int y) {
         }
 }
 
+/**
+ * Periodically updates the position of the sliders and visualizer based on the current playback state.
+ */
 void AssemblePane::timerCallback() {
         positionSlider.setValue(player->getPositionRelative());
         waveDisplay.setPositionRelative(player->getPositionRelative());
 }
 
+/**
+ * Loads an audio file from the specified URL and updates visual elements accordingly.
+ */
 void AssemblePane::loadFile(juce::URL audioURL) {
         DBG("AssemblePane::loadFile called");
         DBG(audioURL.toString(true));
